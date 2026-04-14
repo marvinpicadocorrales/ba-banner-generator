@@ -571,7 +571,9 @@ function toBase64(arr) {
 // static-ui logo → no animation.
 // static-ui cta  → ctaPulse animation.
 //
-function generateBannerHTML(result, settings, overrides) {
+function generateBannerHTML(result, settings, overrides, assetMap) {
+  // assetMap: { layerIdx_sceneIdx: 'assets/layer_0_s0.png', ... } for external file refs
+  // Falls back to base64 if no assetMap entry exists (should not happen in normal flow)
   var W              = result.W;
   var H              = result.H;
   var bgColor        = result.bgColor;
@@ -678,8 +680,11 @@ function generateBannerHTML(result, settings, overrides) {
                          'width:' + _s0.w + 'px;height:' + _s0.h + 'px;z-index:' + z + ';' +
                          'opacity:' + _initOp + ';transition:' + _dlTrans + ';' +
                          'pointer-events:none';
+          var _dlSrc = (assetMap && assetMap['l' + li + '_s' + _scNums[0]])
+            ? assetMap['l' + li + '_s' + _scNums[0]]
+            : 'data:image/png;base64,' + _s0.png;
           divs += '<div data-layers="' + _scNums.join(',') + '" style="' + _dlStyle + '">' +
-                  '<img src="data:image/png;base64,' + _s0.png + '" ' +
+                  '<img src="' + _dlSrc + '" ' +
                   'style="width:' + _s0.w + 'px;height:' + _s0.h + 'px;display:block" alt=""></div>\n';
           hasDataLayers = true;
           _skipNormal   = true;
@@ -690,8 +695,10 @@ function generateBannerHTML(result, settings, overrides) {
     if (_skipNormal) { /* data-layers div already emitted above */ } else
     if (layer.isStatic) {
       // ── Always-visible div ────────────────────────────────────────────────
-      // layer.png is already a base64 string (encoded in plugin sandbox)
-      var src   = 'data:image/png;base64,' + layer.png;
+      // Use external asset file if available (avoids base64 inflation), otherwise fall back to data URI
+      var src = (assetMap && assetMap['l' + li + '_static'])
+        ? assetMap['l' + li + '_static']
+        : 'data:image/png;base64,' + layer.png;
       var style = 'position:absolute;left:' + layer.x + 'px;top:' + layer.y + 'px;' +
                   'width:' + layer.w + 'px;height:' + layer.h + 'px;' +
                   'z-index:' + z + ';pointer-events:none';
@@ -711,8 +718,10 @@ function generateBannerHTML(result, settings, overrides) {
       // Always use each scene's OWN dimensions (s.w, s.h) to avoid clipping.
       var ref = layer.scenes[0];
       for (var si = 0; si < layer.scenes.length; si++) {
-        var s     = layer.scenes[si];
-        var src   = 'data:image/png;base64,' + s.png;
+        var s   = layer.scenes[si];
+        var src = (assetMap && assetMap['l' + li + '_s' + s.scene])
+          ? assetMap['l' + li + '_s' + s.scene]
+          : 'data:image/png;base64,' + s.png;
         var on    = (s.scene === 0) ? ' on' : ''; // use scene INDEX, not array position
         var posX  = (Math.abs(s.x - ref.x) <= 2) ? ref.x : s.x;
         var posY  = (Math.abs(s.y - ref.y) <= 2) ? ref.y : s.y;
@@ -831,7 +840,36 @@ async function buildZip(result, settings, overrides) {
   var zip    = new JSZip();
   var folder = zip.folder(canonicalName);
 
-  folder.file(canonicalName + '.html', generateBannerHTML(result, settings, overrides));
+  // ── Build assetMap: save each layer PNG as a separate file in assets/ ─────
+  // Key format mirrors what generateBannerHTML expects:
+  //   'l{li}_static'   → always-visible layer
+  //   'l{li}_s{scene}' → per-scene layer (including fuzzy-persistent scene 0)
+  var assetMap = {};
+  for (var li = 0; li < result.layers.length; li++) {
+    var layer = result.layers[li];
+    var safeName = 'layer_' + li; // simple numeric ID, no risk of special chars
+    if (layer.isStatic && layer.png) {
+      var fname = 'assets/' + safeName + '.png';
+      folder.file(fname, layer.png, { base64: true });
+      assetMap['l' + li + '_static'] = fname;
+    } else if (layer.scenes && layer.scenes.length > 0) {
+      // Check for fuzzy-persistent (all scenes share same bounding box ≤6px drift)
+      // We detect it the same way generateBannerHTML does: look for _skipNormal path.
+      // For simplicity here, just save one file per unique scene index.
+      var savedScenes = {}; // scene index → filename (dedup identical PNGs)
+      for (var si = 0; si < layer.scenes.length; si++) {
+        var sc = layer.scenes[si];
+        var scFname = 'assets/' + safeName + '_s' + sc.scene + '.png';
+        if (!savedScenes[sc.scene]) {
+          folder.file(scFname, sc.png, { base64: true });
+          savedScenes[sc.scene] = scFname;
+        }
+        assetMap['l' + li + '_s' + sc.scene] = savedScenes[sc.scene];
+      }
+    }
+  }
+
+  folder.file(canonicalName + '.html', generateBannerHTML(result, settings, overrides, assetMap));
 
   // Save video files into assets/ if present
   if (result.videoLayer) {
