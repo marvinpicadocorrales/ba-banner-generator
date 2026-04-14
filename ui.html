@@ -599,9 +599,9 @@ function generateBannerHTML(result, settings, overrides) {
                 'opacity:' + initialOpacity + ';' +
                 'transition:opacity ' + fade + 'ms ease-in-out;' +
                 'object-fit:cover;object-position:center;overflow:hidden;pointer-events:none';
-    return '<video' + dataAttr + ' autoplay muted loop playsinline poster="images/video_poster.png" ' +
+    return '<video' + dataAttr + ' autoplay muted loop playsinline poster="assets/video_poster.png" ' +
            'style="' + style + '">' +
-           '<source src="videos/' + vl.videoFilename + '" type="video/mp4"><\/video>\n';
+           '<source src="assets/' + vl.videoFilename + '" type="video/mp4"><\/video>\n';
   }
 
   var divs = '';
@@ -833,63 +833,20 @@ async function buildZip(result, settings, overrides) {
 
   folder.file(canonicalName + '.html', generateBannerHTML(result, settings, overrides));
 
-  // Save video files if present
+  // Save video files into assets/ if present
   if (result.videoLayer) {
     if (result.videoLayer.posterPng) {
-      folder.file('images/video_poster.png', result.videoLayer.posterPng, { base64: true });
+      folder.file('assets/video_poster.png', result.videoLayer.posterPng, { base64: true });
     }
-    // videoBase64: Figma API (future) → per-funnel picker → default picker → null
     var sectionKey = overrides ? (overrides.funnel || 'XX') : '';
     var mp4Base64  = result.videoLayer.videoBase64
       || (sectionKey ? (videosBySection[sectionKey] || null) : null)
       || selectedVideoBase64
       || null;
     if (mp4Base64) {
-      folder.file('videos/' + result.videoLayer.videoFilename, mp4Base64, { base64: true });
+      folder.file('assets/' + result.videoLayer.videoFilename, mp4Base64, { base64: true });
     }
   }
-
-  // Save reference PNG assets (useful for QA / debugging)
-  // layer.png / s.png are base64 strings — use JSZip's native base64 mode
-  result.layers.forEach(function(layer) {
-    var safeName = layer.name.replace(/[^\w\-]/g, '_');
-    if (layer.isStatic) {
-      folder.file('assets/' + safeName + '.png', layer.png, { base64: true });
-    } else {
-      layer.scenes.forEach(function(s) {
-        var pad = s.scene < 9 ? '0' : '';
-        folder.file('assets/' + safeName + '_scene_' + pad + (s.scene + 1) + '.png', s.png, { base64: true });
-      });
-    }
-  });
-
-  // layout.json — layer manifest for QA tools
-  folder.file('layout.json', JSON.stringify({
-    size:       result.sizeKey,
-    W:          result.W,
-    H:          result.H,
-    mode:       'layered',
-    sceneCount: result.sceneCount,
-    hasVideo:   !!(result.videoLayer),
-    videoLayer: result.videoLayer ? {
-      x: result.videoLayer.x, y: result.videoLayer.y,
-      w: result.videoLayer.w, h: result.videoLayer.h,
-      filename: result.videoLayer.videoFilename,
-    } : null,
-    layers: result.layers.map(function(l) {
-      return {
-        name:     l.name,
-        role:     l.role,
-        subRole:  l.subRole || null,
-        isStatic: l.isStatic,
-        zIndex:   l.zIndex,
-        x:        l.isStatic ? l.x : null,
-        y:        l.isStatic ? l.y : null,
-        w:        l.isStatic ? l.w : null,
-        h:        l.isStatic ? l.h : null,
-      };
-    }),
-  }, null, 2));
 
   return await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
 }
