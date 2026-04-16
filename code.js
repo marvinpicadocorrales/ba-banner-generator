@@ -12,18 +12,17 @@
 // with Clip Content ON. The plugin then exports the correct W×H PNG directly.
 // ─────────────────────────────────────────────────────────────────────────────
 
-figma.showUI(__html__, { width: 480, height: 870, title: 'BA Banner Generator v1.4' });
+figma.showUI(__html__, { width: 480, height: 870, title: 'BA Banner Generator v1.5' });
 
-// ── All standard IAB / BA banner sizes ────────────────────────────────────────
+// ── All standard BA banner sizes ──────────────────────────────────────────────
 const KNOWN_SIZES = [
-  { w: 728, h: 90  },
-  { w: 600, h: 160 }, { w: 600, h: 120 },
-  { w: 468, h: 60  },
-  { w: 320, h: 480 }, { w: 320, h: 50  },
-  { w: 300, h: 600 }, { w: 300, h: 300 }, { w: 300, h: 250 },
-  { w: 300, h: 50  },
-  { w: 250, h: 250 },
+  { w: 300, h: 600 },
   { w: 160, h: 600 },
+  { w: 320, h: 480 },
+  { w: 300, h: 250 },
+  { w: 320, h: 50  },
+  { w: 300, h: 50  },
+  { w: 728, h: 90  },
 ];
 
 // ── Layer role patterns ───────────────────────────────────────────────────────
@@ -147,6 +146,39 @@ function scanPage() {
 // Returns { hasSections, sections:[{id,name,funnel,copyCode,banners}], flatBanners }
 // If no SectionNodes exist at page-root level, hasSections=false and flatBanners
 // falls back to a full scanPage().
+// ── Read execution type from "Control Panel" section ─────────────────────────
+// Looks for a section named "Control Panel" (case-insensitive) at page root,
+// then finds a TEXT node named "vertical" (case-insensitive) and returns its
+// trimmed text lowercased.
+// ── Read a named TEXT layer from "Control Panel" section ─────────────────────
+function readControlPanelField(fieldName) {
+  var page = figma.currentPage;
+  for (var i = 0; i < page.children.length; i++) {
+    var child = page.children[i];
+    if (child.type === 'SECTION' && child.name.trim().toLowerCase() === 'control panel') {
+      function findField(node) {
+        if (node.type === 'TEXT' && node.name.trim().toLowerCase() === fieldName && node.characters && node.characters.trim()) {
+          return node.characters.trim();
+        }
+        if ('children' in node) {
+          for (var ci = 0; ci < node.children.length; ci++) {
+            var found = findField(node.children[ci]);
+            if (found) return found;
+          }
+        }
+        return null;
+      }
+      return findField(child);
+    }
+  }
+  return null;
+}
+
+function readExecutionType() {
+  var val = readControlPanelField('vertical');
+  return val ? val.toLowerCase() : null;
+}
+
 function scanSections() {
   var page     = figma.currentPage;
   var sections = [];
@@ -154,7 +186,7 @@ function scanSections() {
 
   for (var i = 0; i < page.children.length; i++) {
     var child = page.children[i];
-    if (child.type === 'SECTION') {
+    if (child.type === 'SECTION' && child.name.trim().toLowerCase() !== 'control panel') {
       var parsed  = parseSectionName(child.name);
       var banners = scanForBanners(child);
       sections.push({
@@ -350,7 +382,7 @@ async function exportChildLayer(child, scale, frameH) {
   var rx, ry;
   var abb = child.absoluteBoundingBox;
   var arb = child.absoluteRenderBounds;
-  if (child.type === 'TEXT' && child.name === 'T&C Apply' && (frameH === 90 || frameH === 50)) {
+  if (child.type === 'TEXT' && (child.name === 'T&C Apply' || child.name === 'T&Cs Apply') && (frameH === 90 || frameH === 50)) {
     // "T&C Apply" disclaimer on 728x90, 320x50 and 300x50 — center vertically.
     rx = cx;
     ry = Math.round((frameH - pngH) / 2);
@@ -769,6 +801,8 @@ figma.ui.onmessage = async function(msg) {
       sectionSizeCounts: sectionSizeCounts,
       bannerKeys:       bannerKeys,
       bannerCounts:     bannerCounts,
+      executionType:    readExecutionType() || '',
+      campaign:         readControlPanelField('campaign') || '',
     });
     return;
   }
