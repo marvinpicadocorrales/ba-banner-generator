@@ -12,7 +12,7 @@
 // with Clip Content ON. The plugin then exports the correct W×H PNG directly.
 // ─────────────────────────────────────────────────────────────────────────────
 
-figma.showUI(__html__, { width: 480, height: 870, title: 'BA Banner Generator v1.2' });
+figma.showUI(__html__, { width: 480, height: 870, title: 'BA Banner Generator v1.4' });
 
 // ── All standard IAB / BA banner sizes ────────────────────────────────────────
 const KNOWN_SIZES = [

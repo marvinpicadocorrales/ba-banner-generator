@@ -21,7 +21,7 @@ header::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;back
 .hdr-brand{display:flex;flex-direction:column;gap:3px}
 .hdr-name{font-size:12px;font-weight:700;color:var(--text);letter-spacing:.02em}
 .hdr-sub{font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--purple-lt)}
-.hdr-ver{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--text-3);background:var(--bg-3);border:1px solid var(--border-hi);border-radius:3px;padding:2px 7px;align-self:flex-start}
+.hdr-ver{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--text-3);background:var(--bg-3);border:1px solid var(--border-hi);border-radius:3px;padding:2px 7px}
 /* ── Panels & typography ──────────────────────────────────────────────────── */
 h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-2);margin-bottom:8px}
 .panel{padding:12px 14px;border-bottom:1px solid var(--border)}
@@ -37,11 +37,11 @@ h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
 .form-row input:focus{border-color:var(--purple)}
 .form-row .hint{font-size:11px;color:var(--text-3);margin-left:4px}
 /* ── Buttons ──────────────────────────────────────────────────────────────── */
-#btn-row{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border)}
-#btn-scan,#btn-export{padding:7px 14px;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}
-#btn-scan{background:var(--bg-3);color:var(--text-2);border:1px solid var(--border-hi);transition:border-color .15s,color .15s}
-#btn-scan:hover{border-color:var(--purple-lt);color:var(--purple-lt)}
-#btn-export{background:var(--green);color:#111;flex:1}
+#scroll-content{flex:1;overflow-y:auto}
+#btn-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0}
+#btn-scan{background:#fff;color:#111;border:1px solid #fff;border-radius:4px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer;transition:opacity .15s}
+#btn-scan:hover{opacity:.85}
+#btn-export{padding:7px 14px;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;background:var(--green);color:#111;flex:1}
 #btn-export:disabled{opacity:.4;cursor:not-allowed}
 /* ── Progress ─────────────────────────────────────────────────────────────── */
 #progress-bar-wrap{height:3px;background:var(--bg-2)}
@@ -66,16 +66,35 @@ select.nc-input{cursor:pointer}
 .sec-toggle-btn{background:transparent;border:1px solid var(--border-hi);color:var(--text-2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s}
 .sec-toggle-btn:hover{border-color:var(--purple-lt);color:var(--purple-lt)}
 #sections-panel{display:none}
-#sections-list{display:flex;flex-direction:column;gap:4px}
-.sec-chip{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:4px 8px;cursor:pointer;user-select:none}
+#sections-list{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:start}
+.sec-col{display:flex;flex-direction:column;gap:3px}
+.sec-col-hdr{display:block;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:3px;padding:2px 6px;margin-bottom:2px}
+.sec-chip{display:flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 6px;cursor:pointer;user-select:none}
 .sec-chip input[type=checkbox]{accent-color:var(--purple-lt);cursor:pointer;flex-shrink:0}
-.sec-chip label{cursor:pointer;font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec-chip label{cursor:pointer;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sec-chip .sec-sizes{font-size:10px;color:var(--text-3);white-space:nowrap}
 .funnel-badge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;white-space:nowrap;flex-shrink:0}
 .funnel-top{background:#14532d;color:var(--green)}
 .funnel-mid{background:#713f12;color:#fde68a}
 .funnel-bot{background:#7c2d12;color:#fdba74}
 .funnel-xx{background:#374151;color:#9ca3af}
+/* ── Video pickers ────────────────────────────────────────────────────────── */
+#video-pickers-list{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:start}
+.vid-col{display:flex;flex-direction:column;gap:4px}
+.vid-col input[type=file]{font-size:10px;color:#d4d4d4;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:4px;padding:3px 4px;cursor:pointer;width:100%}
+.vid-col .vid-hint{font-size:10px;color:var(--text-3)}
+.vid-col .vid-hint.ok{color:var(--green)}
+/* ── Export overlay ───────────────────────────────────────────────────────── */
+#export-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(7,7,26,.75);backdrop-filter:blur(2px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+#export-overlay.active{display:flex}
+#overlay-card{background:var(--bg-2);border:1px solid var(--border-hi);border-radius:8px;width:100%;max-height:340px;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+#overlay-hdr{flex-shrink:0;padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(160deg,#1a1242 0%,var(--bg-2) 70%);border-radius:8px 8px 0 0}
+#overlay-title{font-size:12px;font-weight:700;color:var(--text);letter-spacing:.02em}
+#overlay-close{background:#fff;color:#111;border:1px solid #fff;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;cursor:pointer;display:none;transition:opacity .15s}
+#overlay-close:hover{opacity:.85}
+#overlay-bar-wrap{height:3px;background:var(--bg-3);flex-shrink:0}
+#overlay-bar{height:3px;background:linear-gradient(90deg,var(--purple),var(--purple-lt));width:0;transition:width .3s}
+#overlay-log{flex:1;overflow-y:auto;padding:10px 14px;font-family:'SF Mono',Menlo,monospace;font-size:11px;line-height:1.7;background:#07071a;border-radius:0 0 8px 8px}
 /* ── Scrollbar ────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -85,6 +104,7 @@ select.nc-input{cursor:pointer}
 <body>
 
 <header>
+  <div style="display:flex;align-items:center;gap:8px">
   <div class="hdr-brand">
     <svg width="129" height="28" viewBox="0 0 129 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
       <defs>
@@ -113,12 +133,15 @@ select.nc-input{cursor:pointer}
       </g>
     </svg>
   </div>
-  <span class="hdr-ver">v1.2</span>
+  <span class="hdr-ver">v1.4</span>
+  </div>
+  <button id="btn-scan">↺ Scan</button>
 </header>
 
+<div id="scroll-content">
 <div id="sections-panel" class="panel">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-    <h3 style="margin-bottom:0">Sections (Copy Codes)</h3>
+    <h3 style="margin-bottom:0">Versions</h3>
     <button id="btn-sec-toggle" class="sec-toggle-btn">Unselect All</button>
   </div>
   <div id="sections-list"></div>
@@ -126,14 +149,17 @@ select.nc-input{cursor:pointer}
 </div>
 
 <div class="panel">
-  <h3>Banner Sizes</h3>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <h3 style="margin-bottom:0">Banner Sizes</h3>
+    <button id="btn-sizes-toggle" class="sec-toggle-btn">Unselect All</button>
+  </div>
   <div id="sizes-list"><span style="color:#666;font-size:12px">Scanning…</span></div>
 </div>
 
 <div class="panel">
   <h3>File Naming</h3>
-  <!-- Row 1: Vertical · Campaign · CopyCode -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
+  <!-- Row 1: Vertical · Campaign · Date -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
     <div>
       <div class="nc-label">Vertical</div>
       <select id="nc-vertical" class="nc-input">
@@ -145,21 +171,6 @@ select.nc-input{cursor:pointer}
     <div>
       <div class="nc-label">Campaign</div>
       <input id="nc-campaign" class="nc-input" placeholder="e.g. W3" maxlength="10">
-    </div>
-    <div>
-      <div class="nc-label">CopyCode</div>
-      <input id="nc-copy" class="nc-input" placeholder="e.g. LNY01" maxlength="12">
-    </div>
-  </div>
-  <!-- Row 2: Channel · Type · Date -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
-    <div>
-      <div class="nc-label">Channel</div>
-      <input id="nc-channel" class="nc-input nc-fixed" value="DISPLAY" readonly tabindex="-1">
-    </div>
-    <div>
-      <div class="nc-label">Type</div>
-      <input id="nc-type" class="nc-input nc-fixed" value="DYN" readonly tabindex="-1">
     </div>
     <div>
       <div class="nc-label">Date</div>
@@ -183,7 +194,7 @@ select.nc-input{cursor:pointer}
     </div>
   </div>
   <div id="video-pickers-list"></div>
-  <div id="video-pickers-hint" style="font-size:10px;color:var(--text-3);margin-top:5px;display:none">One .mp4 per section — same video for all sizes in that section.</div>
+  <div id="video-pickers-hint" style="display:none"></div>
 </div>
 
 <div class="panel">
@@ -213,13 +224,12 @@ select.nc-input{cursor:pointer}
     </div>
   </div>
 </div>
+</div><!-- /scroll-content -->
 
 <div id="btn-row">
-  <button id="btn-scan">↺ Scan</button>
-  <button id="btn-export" disabled>Export Selected</button>
+  <button id="btn-export" disabled>Convert HTML5 Banners</button>
 </div>
 <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
-<div id="log"><span class="log-info">Ready.</span></div>
 <div id="downloads">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
     <h3>Downloads</h3>
@@ -228,6 +238,17 @@ select.nc-input{cursor:pointer}
     </button>
   </div>
   <div id="dl-list"></div>
+</div>
+
+<div id="export-overlay">
+  <div id="overlay-card">
+    <div id="overlay-hdr">
+      <span id="overlay-title">Exporting…</span>
+      <button id="overlay-close">✕ Close</button>
+    </div>
+    <div id="overlay-bar-wrap"><div id="overlay-bar"></div></div>
+    <div id="overlay-log"></div>
+  </div>
 </div>
 
 <script>
@@ -239,14 +260,33 @@ var selectedVideoBase64   = null; // default/fallback MP4 (single picker in Sett
 var videosBySection       = {};   // per-section MP4s keyed by "FUNNEL|copyCode"
 
 function log(msg, type) {
-  var el  = document.getElementById('log');
+  var el = document.getElementById('overlay-log');
+  if (!el) return;
   var div = document.createElement('div');
   div.className = 'log-' + (type || 'info');
   div.textContent = msg;
   el.appendChild(div);
   el.scrollTop = el.scrollHeight;
 }
-function setProgress(pct) { document.getElementById('progress-bar').style.width = pct + '%'; }
+function setProgress(pct) {
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('overlay-bar').style.width  = pct + '%';
+}
+
+function updateExportBtn() {
+  var btn   = document.getElementById('btn-export');
+  var total = 0;
+  if (currentSections.length > 0) {
+    document.querySelectorAll('#sections-list input:checked').forEach(function(cb) {
+      var idx = parseInt(cb.value, 10);
+      if (currentSections[idx]) total += (currentSections[idx].sizeCount || 0);
+    });
+  } else {
+    total = document.querySelectorAll('#sizes-list input:checked').length;
+  }
+  btn.textContent = 'Convert ' + (total || '') + (total ? ' ' : '') + 'HTML5 Banners';
+  btn.disabled    = total === 0;
+}
 
 function getSettings() {
   return {
@@ -258,7 +298,7 @@ function getSettings() {
     // ── Naming convention ──────────────────────────────────────────────────
     ncVertical: document.getElementById('nc-vertical').value.trim() || 'X',
     ncCampaign: document.getElementById('nc-campaign').value.trim() || 'XX',
-    ncCopy:     document.getElementById('nc-copy').value.trim()     || 'XX',
+    ncCopy:     'XX',
     ncChannel:  'DISPLAY',
     ncType:     'DYN',
     ncDate:     document.getElementById('nc-date').value.trim()     || 'YYYYMMDD',
@@ -302,10 +342,12 @@ function renderBanners(banners) {
       '<input type="checkbox" id="cb-' + key + '" value="' + key + '" checked>' +
       '<label for="cb-' + key + '">' + key + '</label>' +
       '<span class="badge">' + n + 's</span>';
+    chip.querySelector('input').addEventListener('change', function(){ updateSizesToggleBtn(); updateExportBtn(); });
     list.appendChild(chip);
   });
-  document.getElementById('btn-export').disabled = false;
   log('Found ' + keys.length + ' size(s): ' + keys.join(', '), 'ok');
+  updateSizesToggleBtn();
+  updateExportBtn();
 }
 
 // ── CSS class for funnel color badge ─────────────────────────────────────────
@@ -330,22 +372,59 @@ function renderSections(sections) {
 
   panel.style.display = 'block';
 
+  // Group by funnel, preserving original indices for export lookup
+  var groups = { TOF: [], MOF: [], BOF: [], XX: [] };
   sections.forEach(function(sec, idx) {
-    var sizeCount = sec.sizeCount || 0;
-    var chip      = document.createElement('div');
-    chip.className = 'sec-chip';
-    chip.innerHTML =
-      '<input type="checkbox" id="sec-cb-' + idx + '" value="' + idx + '" checked>' +
-      '<span class="funnel-badge ' + funnelClass(sec.funnel) + '">' + (sec.funnel || 'XX') + '</span>' +
-      '<label for="sec-cb-' + idx + '">' + sec.copyCode + '</label>' +
-      '<span class="sec-sizes">' + sizeCount + ' size(s)</span>';
-    list.appendChild(chip);
-    chip.querySelector('input').addEventListener('change', updateSecToggleBtn);
+    var f = (sec.funnel || 'XX').toUpperCase();
+    if (!groups[f]) groups[f] = [];
+    groups[f].push({ sec: sec, origIdx: idx });
   });
 
-  document.getElementById('sections-info').textContent =
-    sections.length + ' section(s) — each exports its own set of ZIPs.';
+  ['TOF', 'MOF', 'BOF'].forEach(function(funnelKey) {
+    var col = document.createElement('div');
+    col.className = 'sec-col';
+
+    var hdr = document.createElement('span');
+    hdr.className = 'sec-col-hdr funnel-badge ' + funnelClass(funnelKey);
+    hdr.textContent = funnelKey;
+    col.appendChild(hdr);
+
+    (groups[funnelKey] || []).forEach(function(item) {
+      var chip = document.createElement('div');
+      chip.className = 'sec-chip';
+      chip.innerHTML =
+        '<input type="checkbox" id="sec-cb-' + item.origIdx + '" value="' + item.origIdx + '" checked>' +
+        '<label for="sec-cb-' + item.origIdx + '">' + item.sec.copyCode + '</label>' +
+        '<span class="sec-sizes">' + (item.sec.sizeCount || 0) + '</span>';
+      col.appendChild(chip);
+      chip.querySelector('input').addEventListener('change', function(){ updateSecToggleBtn(); updateExportBtn(); });
+    });
+
+    list.appendChild(col);
+  });
+
+  // XX (no funnel assigned) — full-width row below the 3 columns
+  if (groups.XX && groups.XX.length) {
+    var xxRow = document.createElement('div');
+    xxRow.style.cssText = 'grid-column:1/-1;display:flex;flex-wrap:wrap;gap:3px;margin-top:2px';
+    groups.XX.forEach(function(item) {
+      var chip = document.createElement('div');
+      chip.className = 'sec-chip';
+      chip.innerHTML =
+        '<input type="checkbox" id="sec-cb-' + item.origIdx + '" value="' + item.origIdx + '" checked>' +
+        '<span class="funnel-badge funnel-xx">XX</span>' +
+        '<label for="sec-cb-' + item.origIdx + '">' + item.sec.copyCode + '</label>' +
+        '<span class="sec-sizes">' + (item.sec.sizeCount || 0) + '</span>';
+      xxRow.appendChild(chip);
+      chip.querySelector('input').addEventListener('change', function(){ updateSecToggleBtn(); updateExportBtn(); });
+    });
+    list.appendChild(xxRow);
+  }
+
+  var totalBanners = sections.reduce(function(sum, s) { return sum + (s.sizeCount || 0); }, 0);
+  document.getElementById('sections-info').textContent = 'Number of versions: ' + sections.length + '   |   Total banners: ' + totalBanners;
   updateSecToggleBtn();
+  updateExportBtn();
 }
 
 function updateSecToggleBtn() {
@@ -361,7 +440,25 @@ document.getElementById('btn-sec-toggle').addEventListener('click', function() {
   var allChecked = Array.from(cbs).every(function(cb) { return cb.checked; });
   cbs.forEach(function(cb) { cb.checked = !allChecked; });
   updateSecToggleBtn();
+  updateExportBtn();
 });
+
+function updateSizesToggleBtn() {
+  var cbs = document.querySelectorAll('#sizes-list input[type=checkbox]');
+  var btn = document.getElementById('btn-sizes-toggle');
+  if (!cbs.length || !btn) return;
+  var allChecked = Array.from(cbs).every(function(cb) { return cb.checked; });
+  btn.textContent = allChecked ? 'Unselect All' : 'Select All';
+}
+
+document.getElementById('btn-sizes-toggle').addEventListener('click', function() {
+  var cbs = document.querySelectorAll('#sizes-list input[type=checkbox]');
+  var allChecked = Array.from(cbs).every(function(cb) { return cb.checked; });
+  cbs.forEach(function(cb) { cb.checked = !allChecked; });
+  updateSizesToggleBtn();
+  updateExportBtn();
+});
+
 
 // ── Settings collapse toggle ──────────────────────────────────────────────────
 document.getElementById('btn-settings-toggle').addEventListener('click', function() {
@@ -393,56 +490,60 @@ function renderVideoPickers(sections) {
   document.getElementById('video-file-row').style.display = 'none';
   hint.style.display = 'block';
 
-  // Deduplicate: one picker per unique funnel (all copy codes in a funnel share the same video)
+  // One column per unique funnel (TOF / MOF / BOF order)
+  var funnelOrder = ['TOF', 'MOF', 'BOF'];
   var seenFunnels = {};
+  // Collect funnels in preferred order first, then any others
+  var funnelKeys = [];
+  funnelOrder.forEach(function(f) {
+    if (sections.some(function(s) { return (s.funnel || 'XX') === f; })) funnelKeys.push(f);
+  });
   sections.forEach(function(sec) {
-    var funnel = sec.funnel || 'XX';
-    if (seenFunnels[funnel]) return; // already rendered
+    var f = sec.funnel || 'XX';
+    if (funnelKeys.indexOf(f) === -1) funnelKeys.push(f);
+  });
+
+  funnelKeys.forEach(function(funnel) {
+    if (seenFunnels[funnel]) return;
     seenFunnels[funnel] = true;
 
-    var key = funnel; // keyed by funnel only
+    var key = funnel;
 
-    var row = document.createElement('div');
-    row.className = 'form-row';
+    var col = document.createElement('div');
+    col.className = 'vid-col';
 
-    var lbl = document.createElement('label');
-    lbl.style.cssText = 'flex:0 0 110px;color:#999;font-size:12px';
-    lbl.textContent = funnel;
-
-    var wrap = document.createElement('div');
-    wrap.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:3px';
+    var hdr = document.createElement('span');
+    hdr.className = 'sec-col-hdr funnel-badge ' + funnelClass(funnel);
+    hdr.textContent = funnel;
+    col.appendChild(hdr);
 
     var inp = document.createElement('input');
-    inp.type    = 'file';
-    inp.accept  = '.mp4,video/mp4';
-    inp.style.cssText = 'font-size:11px;color:#d4d4d4;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:4px;padding:3px 6px;cursor:pointer;width:100%';
+    inp.type   = 'file';
+    inp.accept = '.mp4,video/mp4';
 
-    var hint = document.createElement('span');
-    hint.className = 'hint';
-    hint.style.fontSize = '10px';
-    hint.textContent = '.mp4 for this section';
+    var hintEl = document.createElement('span');
+    hintEl.className = 'vid-hint';
+    hintEl.textContent = '.mp4';
 
     inp.addEventListener('change', (function(k, h) {
       return function(e) {
         var file = e.target.files && e.target.files[0];
-        if (!file) { delete videosBySection[k]; h.textContent = '.mp4 for this section'; h.style.color = ''; return; }
+        if (!file) { delete videosBySection[k]; h.textContent = '.mp4'; h.className = 'vid-hint'; return; }
         var reader = new FileReader();
         reader.onload = function(ev) {
           var raw = ev.target.result, ci = raw.indexOf(',');
           videosBySection[k] = ci >= 0 ? raw.slice(ci + 1) : raw;
           h.textContent = '✓ ' + file.name;
-          h.style.color = '#4ade80';
+          h.className = 'vid-hint ok';
           log('Video loaded for funnel ' + k + ': ' + file.name + ' (' + formatSize(file.size) + ')', 'ok');
         };
         reader.readAsDataURL(file);
       };
-    })(key, hint));
+    })(key, hintEl));
 
-    wrap.appendChild(inp);
-    wrap.appendChild(hint);
-    row.appendChild(lbl);
-    row.appendChild(wrap);
-    list.appendChild(row);
+    col.appendChild(inp);
+    col.appendChild(hintEl);
+    list.appendChild(col);
   });
 }
 
@@ -531,7 +632,13 @@ document.getElementById('btn-export').addEventListener('click', function() {
   document.getElementById('btn-export').disabled = true;
   document.getElementById('downloads').style.display = 'none';
   document.getElementById('btn-dl-all').style.display = 'none';
-  document.getElementById('log').innerHTML = '';
+
+  // Show export overlay
+  document.getElementById('overlay-log').innerHTML = '';
+  document.getElementById('overlay-bar').style.width = '0';
+  document.getElementById('overlay-title').textContent = 'Exporting…';
+  document.getElementById('overlay-close').style.display = 'none';
+  document.getElementById('export-overlay').classList.add('active');
   allExportedBlobs = [];
   setProgress(5);
 
@@ -961,13 +1068,40 @@ async function handleExportComplete(results, settings, errors) {
 
   setProgress(100);
   log('\nDone! ' + done + '/' + total + ' banner(s) ready.', 'ok');
-  if (done > 0) {
-    document.getElementById('downloads').style.display = 'block';
-    document.getElementById('btn-dl-all').style.display = done > 1 ? 'block' : 'none';
-  }
 
   isExporting = false;
   document.getElementById('btn-export').disabled = false;
+
+  // Update overlay header
+  document.getElementById('overlay-title').textContent = done > 0
+    ? '✓ Done — ' + done + ' banner(s) ready'
+    : '⚠ Export finished with errors';
+  document.getElementById('overlay-close').style.display = 'block';
+
+  // Auto-download master ZIP
+  if (done > 0) {
+    try {
+      log('\nPackaging master ZIP…', 'info');
+      var s = getSettings();
+      var masterOverrides = lastExportHadSections ? { funnel: 'MULTI', copyCode: 'MULTI' } : null;
+      var masterName = buildCanonicalName(s, 'ALL_BANNERS', masterOverrides) + '.zip';
+
+      var master = new JSZip();
+      for (var mi = 0; mi < allExportedBlobs.length; mi++) {
+        var me = allExportedBlobs[mi];
+        var buf = await me.blob.arrayBuffer();
+        master.file(me.filename, buf);
+      }
+      var masterBlob = await master.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+      var masterUrl  = URL.createObjectURL(masterBlob);
+      var a = document.createElement('a');
+      a.href = masterUrl; a.download = masterName; a.click();
+      URL.revokeObjectURL(masterUrl);
+      log('⬇ Saving ' + masterName + ' (' + formatSize(masterBlob.size) + ')', 'ok');
+    } catch(ze) {
+      log('⚠ Could not build master ZIP: ' + ze.message, 'warn');
+    }
+  }
 }
 
 // ── Message listener ──────────────────────────────────────────────────────────
@@ -981,6 +1115,11 @@ window.addEventListener('message', async function(ev) {
     case 'error':          log(msg.message, 'err');  break;
     case 'export-complete': await handleExportComplete(msg.results, msg.settings, msg.errors); break;
   }
+});
+
+// ── Export overlay close ──────────────────────────────────────────────────────
+document.getElementById('overlay-close').addEventListener('click', function() {
+  document.getElementById('export-overlay').classList.remove('active');
 });
 
 // ── Download All handler ──────────────────────────────────────────────────────
@@ -1024,25 +1163,13 @@ function updatePreview() {
   var campaign = document.getElementById('nc-campaign').value || 'CAMPAIGN';
   var previewEl = document.getElementById('nc-preview');
 
-  if (currentSections && currentSections.length > 0) {
-    // Section mode: funnel + copy come from Figma section data
-    var seen  = {};
-    var lines = [];
-    currentSections.forEach(function(sec) {
-      var f = sec.funnel   || 'XX';
-      var c = (sec.copyCode || 'XX').replace(/\s+/g, '-');
-      var key = f + '_' + c;
-      if (seen[key]) return;
-      seen[key] = true;
-      lines.push(['BA', year, vertical, campaign, f, c, 'DISPLAY', 'DYN', date, '{size}'].join('_') + '.zip');
-    });
-    previewEl.textContent = lines.join('\n');
-  } else {
-    // Flat mode: funnel is XX (no sections detected), copy from field
-    var copy = document.getElementById('nc-copy').value || 'COPY';
-    previewEl.textContent =
-      ['BA', year, vertical, campaign, 'XX', copy, 'DISPLAY', 'DYN', date, '{size}'].join('_') + '.zip';
-  }
+  var f = (currentSections && currentSections.length > 0)
+    ? (currentSections[0].funnel || 'XX')
+    : 'XX';
+  var c = (currentSections && currentSections.length > 0)
+    ? ((currentSections[0].copyCode || 'XX').replace(/\s+/g, '-'))
+    : 'XX';
+  previewEl.textContent = ['BA', year, vertical, campaign, f, c, 'DISPLAY', 'DYN', date, '{size}'].join('_') + '.zip';
 }
 
 // ── Setup: date auto-fill + preview listeners ─────────────────────────────────
@@ -1057,7 +1184,7 @@ document.addEventListener('DOMContentLoaded', function() {
     (dd < 10 ? '0' : '') + dd;
 
   // Attach live-preview listeners to every naming field
-  ['nc-vertical','nc-campaign','nc-copy','nc-date'].forEach(function(id) {
+  ['nc-vertical','nc-campaign','nc-date'].forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input',  updatePreview);
