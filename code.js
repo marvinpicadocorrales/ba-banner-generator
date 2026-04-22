@@ -14,6 +14,8 @@
 
 figma.showUI(__html__, { width: 480, height: 870, title: 'BA Banner Generator v1.5' });
 
+var stopRequested = false;
+
 // ── All standard BA banner sizes ──────────────────────────────────────────────
 const KNOWN_SIZES = [
   { w: 300, h: 600 },
@@ -33,7 +35,7 @@ const KNOWN_SIZES = [
 // visible and always rendered above the video layer.
 // Everything else is a scene/bg layer (hash-compared, may cross-fade).
 
-const STATIC_UI_PATTERNS = [/^cta\s*\+\s*logo/i, /^cta$/i, /^cta\s+bof$/i, /^ba_logo/i, /^logo/i];
+const STATIC_UI_PATTERNS = [/^cta\s*\+\s*logo/i, /^cta$/i, /^cta\s+(bof|tof|mof)$/i, /^ba_logo/i, /^logo/i];
 const LOGO_PATTERNS      = [/^ba_logo/i, /logo/i];
 const VIDEO_PATTERNS     = [/\.webm$/i, /video/i];
 const SCENE_PATTERNS     = [/^master/i, /master\s*\(/i];
@@ -540,6 +542,7 @@ async function exportSize(sizeKey, frames, settings) {
   var zCounter       = 0;
 
   for (var i = 0; i < frames.length; i++) {
+    if (stopRequested) throw { stopped: true };
     var fn = await figma.getNodeByIdAsync(frames[i].id);
     if (!fn || !('children' in fn)) continue;
 
@@ -634,11 +637,13 @@ async function exportSize(sizeKey, frames, settings) {
         try {
           data = await exportChildLayer(node, scale, H);
         } catch (e) {
+          if (e && e.stopped) throw e;
           var frameLabel = 'frame ' + (i + 1) + '/' + frames.length;
           var critical   = (i === 0) ? ' ⚠ (frame 1 — layer will be missing entirely)' : '';
           figma.ui.postMessage({ type: 'warning', message: '  Skipped "' + node.name + '" at ' + frameLabel + ': ' + e.message + critical });
           continue;
         }
+        if (stopRequested) throw { stopped: true };
         data.scene = i;
 
         if (!layerDataByKey[key]) {
@@ -813,10 +818,25 @@ figma.ui.onmessage = async function(msg) {
     var settings         = msg.settings;
     var results          = [];
     var errors           = [];
+    stopRequested        = false;
 
     if (selectedSections && selectedSections.length > 0) {
       // ── Section mode: one export pass per section ──────────────────────────
       var freshScan = scanSections();
+
+      // Count total jobs upfront for accurate progress
+      var totalJobs = 0;
+      for (var ci = 0; ci < selectedSections.length; ci++) {
+        var cSec = null;
+        for (var cni = 0; cni < freshScan.sections.length; cni++) {
+          if (freshScan.sections[cni].id === selectedSections[ci].id) { cSec = freshScan.sections[cni]; break; }
+        }
+        if (!cSec) continue;
+        for (var cki = 0; cki < selectedSizes.length; cki++) {
+          if (cSec.banners[selectedSizes[cki]]) totalJobs++;
+        }
+      }
+      figma.ui.postMessage({ type: 'export-total', total: totalJobs });
 
       for (var secIdx = 0; secIdx < selectedSections.length; secIdx++) {
         var secInfo = selectedSections[secIdx];
@@ -841,6 +861,7 @@ figma.ui.onmessage = async function(msg) {
           if (!secNode.banners[sizeKeyS]) continue; // size absent in this section — skip silently
 
           figma.ui.postMessage({ type: 'progress', message: '  Processing ' + sizeKeyS + '…' });
+          var _stopped = false;
           try {
             var resS       = await exportSize(sizeKeyS, secNode.banners[sizeKeyS], settings);
             resS.funnel    = secNode.funnel;
@@ -848,35 +869,55 @@ figma.ui.onmessage = async function(msg) {
             resS.sectionName = secNode.name;
             results.push(resS);
           } catch (eS) {
-            var errLabel = secNode.name + ' / ' + sizeKeyS;
-            errors.push(errLabel + ': ' + eS.message);
-            figma.ui.postMessage({ type: 'error', message: '✕ ' + errLabel + ': ' + eS.message });
+            if (eS && eS.stopped) { _stopped = true; }
+            else {
+              var errLabel = secNode.name + ' / ' + sizeKeyS;
+              errors.push(errLabel + ': ' + eS.message);
+              figma.ui.postMessage({ type: 'error', message: '✕ ' + errLabel + ': ' + eS.message });
+            }
           }
+          figma.ui.postMessage({ type: 'export-tick' });
+          if (_stopped || stopRequested) return;
         }
+        if (stopRequested) return;
       }
 
     } else {
       // ── Flat mode: original behaviour ─────────────────────────────────────
       var allBanners = scanPage();
 
+      figma.ui.postMessage({ type: 'export-total', total: selectedSizes.length });
+
       for (var si = 0; si < selectedSizes.length; si++) {
         var sizeKey = selectedSizes[si];
         if (!allBanners[sizeKey]) {
           errors.push(sizeKey + ': no frames found on page');
+          figma.ui.postMessage({ type: 'export-tick' });
           continue;
         }
         figma.ui.postMessage({ type: 'progress', message: 'Processing ' + sizeKey + '…' });
+        var _flatStopped = false;
         try {
           var result = await exportSize(sizeKey, allBanners[sizeKey], settings);
           results.push(result);
         } catch (e) {
-          errors.push(sizeKey + ': ' + e.message);
-          figma.ui.postMessage({ type: 'error', message: '✕ ' + sizeKey + ': ' + e.message });
+          if (e && e.stopped) { _flatStopped = true; }
+          else {
+            errors.push(sizeKey + ': ' + e.message);
+            figma.ui.postMessage({ type: 'error', message: '✕ ' + sizeKey + ': ' + e.message });
+          }
         }
+        figma.ui.postMessage({ type: 'export-tick' });
+        if (_flatStopped || stopRequested) return;
       }
     }
 
     figma.ui.postMessage({ type: 'export-complete', results: results, settings: settings, errors: errors });
+    return;
+  }
+
+  if (msg.type === 'stop') {
+    stopRequested = true;
     return;
   }
 

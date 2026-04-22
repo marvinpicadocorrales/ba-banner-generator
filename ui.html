@@ -25,7 +25,7 @@ header::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;back
 /* ── Panels & typography ──────────────────────────────────────────────────── */
 h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-2);margin-bottom:8px}
 .panel{padding:12px 14px;border-bottom:1px solid var(--border)}
-#sizes-list{display:flex;flex-wrap:wrap;gap:6px;min-height:28px}
+#sizes-list{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;min-height:28px}
 .size-chip{display:flex;align-items:center;gap:5px;background:var(--bg-2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;user-select:none}
 .size-chip input[type=checkbox]{accent-color:var(--purple-lt);cursor:pointer}
 .size-chip label{cursor:pointer;font-size:12px}
@@ -39,13 +39,28 @@ h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
 /* ── Buttons ──────────────────────────────────────────────────────────────── */
 #scroll-content{flex:1;overflow-y:auto}
 #btn-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0}
-#btn-scan{background:#fff;color:#111;border:1px solid #fff;border-radius:4px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer;transition:opacity .15s}
+#btn-scan{background:#fff;color:#111;border:1px solid #fff;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;transition:opacity .15s;white-space:nowrap}
 #btn-scan:hover{opacity:.85}
+#btn-pick-folder{background:#1e1e2e;border:1px solid #3a3a5a;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;color:#888;cursor:pointer;white-space:nowrap;transition:opacity .15s}
+#btn-pick-folder:hover{opacity:.85}
+#btn-help{width:24px;height:24px;border-radius:50%;background:transparent;border:1px solid #3a3a5a;color:#666;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s;flex-shrink:0;line-height:1}
+#btn-help:hover{border-color:#a78bfa;color:#a78bfa}
+/* ── Help overlay ──────────────────────────────────────────────────────────── */
+#help-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(7,7,26,.85);backdrop-filter:blur(3px);z-index:300;display:none;align-items:center;justify-content:center;padding:16px}
+#help-overlay.active{display:flex}
+#help-card{background:#0d0d1f;border:1px solid #2a2a4a;border-radius:10px;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 48px rgba(0,0,0,.7)}
+#help-card-hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #1e1e3a;background:linear-gradient(160deg,#1a1242 0%,#0d0d1f 70%)}
+#help-card-title{font-size:12px;font-weight:700;color:#fff;letter-spacing:.04em}
+#btn-help-close{background:transparent;color:#888;border:1px solid #333;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;cursor:pointer;transition:opacity .15s}
+#btn-help-close:hover{opacity:.85}
+#help-iframe{flex:1;border:none;width:100%;background:#0d0d1f}
 #btn-export{padding:7px 14px;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;background:var(--green);color:#111;flex:1}
 #btn-export:disabled{opacity:.4;cursor:not-allowed}
 /* ── Progress ─────────────────────────────────────────────────────────────── */
-#progress-bar-wrap{height:3px;background:var(--bg-2)}
-#progress-bar{height:3px;background:linear-gradient(90deg,var(--purple),var(--purple-lt));width:0;transition:width .3s}
+#progress-bar-wrap{height:3px;background:var(--bg-2);position:relative}
+#progress-bar{height:3px;background:linear-gradient(90deg,var(--purple),var(--purple-lt));width:0;transition:width .4s ease-out}
+#progress-pct{position:absolute;right:0;top:4px;font-size:9px;font-weight:700;color:var(--purple-lt);letter-spacing:.04em;opacity:0;transition:opacity .2s}
+#progress-pct.visible{opacity:1}
 /* ── Log ──────────────────────────────────────────────────────────────────── */
 #log{flex:1;overflow-y:auto;padding:10px 14px;font-family:'SF Mono',Menlo,monospace;font-size:11px;line-height:1.7;background:#07071a;min-height:80px}
 .log-info{color:var(--text-3)}.log-ok{color:var(--green)}.log-warn{color:var(--warn)}.log-err{color:var(--error)}
@@ -74,27 +89,47 @@ select.nc-input{cursor:pointer}
 .sec-chip label{cursor:pointer;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sec-chip .sec-sizes{font-size:10px;color:var(--text-3);white-space:nowrap}
 .funnel-badge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;white-space:nowrap;flex-shrink:0}
-.funnel-top{background:#14532d;color:var(--green)}
-.funnel-mid{background:#713f12;color:#fde68a}
-.funnel-bot{background:#7c2d12;color:#fdba74}
+.funnel-top{background:#831843;color:#fbcfe8}
+.funnel-mid{background:#1e3a5f;color:#93c5fd}
+.funnel-bot{background:#3b0764;color:#d8b4fe}
 .funnel-xx{background:#374151;color:#9ca3af}
 /* ── Video pickers ────────────────────────────────────────────────────────── */
 #video-pickers-list{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:start}
 .vid-col{display:flex;flex-direction:column;gap:4px}
-.vid-col input[type=file]{font-size:10px;color:#d4d4d4;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:4px;padding:3px 4px;cursor:pointer;width:100%}
+.vid-col input[type=file]{display:none}
+.vid-pick-btn{font-size:10px;color:#d4d4d4;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:4px;padding:3px 6px;cursor:pointer;width:100%;text-align:left;transition:border-color .15s,color .15s,background .15s;height:28px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.vid-pick-btn:hover{border-color:#666;color:#fff}
+.vid-pick-btn.loaded{color:#4ade80;background:#0d2e1a;border-color:#166534}
 .vid-col .vid-hint{font-size:10px;color:var(--text-3)}
 .vid-col .vid-hint.ok{color:var(--green)}
+/* single picker */
+#video-file-input{display:none}
+.vid-single-btn{font-size:11px;color:#d4d4d4;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:4px;padding:3px 6px;cursor:pointer;flex:1;text-align:left;transition:border-color .15s,color .15s,background .15s;height:28px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.vid-single-btn:hover{border-color:#666;color:#fff}
+.vid-single-btn.loaded{color:#4ade80;background:#0d2e1a;border-color:#166534}
 /* ── Export overlay ───────────────────────────────────────────────────────── */
 #export-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(7,7,26,.75);backdrop-filter:blur(2px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
 #export-overlay.active{display:flex}
-#overlay-card{background:var(--bg-2);border:1px solid var(--border-hi);border-radius:8px;width:100%;max-height:340px;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.6)}
-#overlay-hdr{flex-shrink:0;padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(160deg,#1a1242 0%,var(--bg-2) 70%);border-radius:8px 8px 0 0}
-#overlay-title{font-size:12px;font-weight:700;color:var(--text);letter-spacing:.02em}
-#overlay-close{background:#fff;color:#111;border:1px solid #fff;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;cursor:pointer;display:none;transition:opacity .15s}
+#overlay-card{background:var(--bg-2);border:1px solid var(--border-hi);border-radius:8px;width:100%;max-height:420px;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+#overlay-hdr{flex-shrink:0;padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;background:linear-gradient(160deg,#1a1242 0%,var(--bg-2) 70%);border-radius:8px 8px 0 0}
+#overlay-hdr-left{display:flex;align-items:center;gap:10px;min-width:0}
+#overlay-title{font-size:12px;font-weight:700;color:var(--text);letter-spacing:.02em;white-space:nowrap}
+#overlay-meta{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600;color:var(--purple-lt);letter-spacing:.04em;opacity:0;transition:opacity .2s;white-space:nowrap}
+#overlay-meta.visible{opacity:1}
+#overlay-meta-sep{color:#444}
+#overlay-hdr-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+#overlay-close{background:transparent;color:#888;border:1px solid #333;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;cursor:pointer;display:none;transition:opacity .15s}
 #overlay-close:hover{opacity:.85}
+#btn-stop-export{background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b;border-radius:4px;padding:2px 10px;font-size:11px;font-weight:700;cursor:pointer;display:none;transition:opacity .15s}
+#btn-stop-export:hover{background:#991b1b}
 #overlay-bar-wrap{height:3px;background:var(--bg-3);flex-shrink:0}
-#overlay-bar{height:3px;background:linear-gradient(90deg,var(--purple),var(--purple-lt));width:0;transition:width .3s}
-#overlay-log{flex:1;overflow-y:auto;padding:10px 14px;font-family:'SF Mono',Menlo,monospace;font-size:11px;line-height:1.7;background:#07071a;border-radius:0 0 8px 8px}
+#overlay-bar{height:3px;background:linear-gradient(90deg,var(--purple),var(--purple-lt));width:0;transition:width .4s ease-out}
+#overlay-log{flex:1;overflow-y:auto;padding:10px 14px;font-family:'SF Mono',Menlo,monospace;font-size:11px;line-height:1.7;background:#07071a}
+#overlay-footer{flex-shrink:0;padding:10px 14px;border-top:1px solid var(--border);display:none;align-items:center;justify-content:space-between;gap:8px;background:var(--bg-2);border-radius:0 0 8px 8px}
+#overlay-footer-info{font-size:11px;color:#666}
+#btn-overlay-download{background:var(--green);color:#111;border:none;border-radius:5px;padding:6px 18px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s}
+#btn-overlay-download:hover{opacity:.85}
+#btn-overlay-download:disabled{opacity:.4;cursor:not-allowed}
 /* ── Alerts bar ───────────────────────────────────────────────────────────── */
 #alerts{flex-shrink:0;display:none;padding:6px 14px;font-size:11px;font-weight:500;letter-spacing:.02em;border-bottom:1px solid transparent;gap:7px;align-items:center}
 #alerts.ok  {display:flex;background:#0d2318;border-color:#166534;color:var(--green)}
@@ -142,11 +177,22 @@ select.nc-input{cursor:pointer}
   <span class="hdr-ver">v1.5</span>
   </div>
   <div style="display:flex;gap:6px;align-items:center">
-    <button id="btn-pick-folder" title="Pick project folder for auto video loading" style="font-size:10px;padding:4px 8px;background:#1e1e2e;border:1px solid #3a3a5a;border-radius:4px;color:#888;cursor:pointer;white-space:nowrap">📁 Project</button>
+    <button id="btn-pick-folder" title="Pick project folder for auto video loading">📁 Project</button>
     <input id="folder-input" type="file" webkitdirectory style="display:none">
     <button id="btn-scan">↺ Scan</button>
+    <button id="btn-help" title="Help & Documentation">?</button>
   </div>
 </header>
+
+<div id="help-overlay">
+  <div id="help-card">
+    <div id="help-card-hdr">
+      <span id="help-card-title">Help &amp; Documentation</span>
+      <button id="btn-help-close">✕ Close</button>
+    </div>
+    <iframe id="help-iframe"></iframe>
+  </div>
+</div>
 
 <div id="alerts"><span id="alerts-icon"></span><span id="alerts-msg"></span></div>
 <div id="scroll-content">
@@ -200,8 +246,8 @@ select.nc-input{cursor:pointer}
   <div class="form-row" id="video-file-row">
     <label>Video (.mp4)</label>
     <div style="flex:1;display:flex;flex-direction:column;gap:3px">
-      <input id="video-file-input" type="file" accept=".mp4,video/mp4"
-        style="flex:1;font-size:11px;color:#d4d4d4;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:4px;padding:3px 6px;cursor:pointer">
+      <input id="video-file-input" type="file" accept=".mp4,video/mp4">
+      <button type="button" class="vid-single-btn" onclick="document.getElementById('video-file-input').click()">Choose .mp4…</button>
       <span id="video-file-hint" class="hint" style="font-size:10px">For banners with a video layer</span>
     </div>
   </div>
@@ -241,7 +287,7 @@ select.nc-input{cursor:pointer}
 <div id="btn-row">
   <button id="btn-export" disabled>Convert HTML5 Banners</button>
 </div>
-<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+<div id="progress-bar-wrap"><div id="progress-bar"></div><span id="progress-pct"></span></div>
 <div id="downloads">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
     <h3>Downloads</h3>
@@ -255,11 +301,25 @@ select.nc-input{cursor:pointer}
 <div id="export-overlay">
   <div id="overlay-card">
     <div id="overlay-hdr">
-      <span id="overlay-title">Exporting…</span>
-      <button id="overlay-close">✕ Close</button>
+      <div id="overlay-hdr-left">
+        <span id="overlay-title">Exporting…</span>
+        <span id="overlay-meta">
+          <span id="overlay-pct-hdr">0%</span>
+          <span id="overlay-meta-sep">·</span>
+          <span id="overlay-timer">0s</span>
+        </span>
+      </div>
+      <div id="overlay-hdr-right">
+        <button id="btn-stop-export">■ Stop</button>
+        <button id="overlay-close">✕ Close</button>
+      </div>
     </div>
     <div id="overlay-bar-wrap"><div id="overlay-bar"></div></div>
     <div id="overlay-log"></div>
+    <div id="overlay-footer">
+      <span id="overlay-footer-info"></span>
+      <button id="btn-overlay-download" disabled>⬇ Download ZIP</button>
+    </div>
   </div>
 </div>
 
@@ -269,6 +329,10 @@ var allExportedBlobs      = []; // { filename, blob } — accumulates across exp
 var workingFolderHandle   = null; // FileSystemDirectoryHandle — persists for the session
 var allBannerData         = []; // { result, settings, overrides } — for structured master ZIP
 var currentSections       = []; // full section objects from last scan
+var pendingMasterBlob     = null; // master ZIP blob waiting for user to click Download
+var pendingMasterName     = '';
+var exportTotal           = 0;   // total banners code.js will process (for accurate progress)
+var exportDone            = 0;   // banners processed so far in code.js
 var lastExportHadSections = false;
 var selectedVideoBase64   = null; // default/fallback MP4 (single picker in Settings)
 var videosBySection       = {};   // per-section MP4s keyed by "FUNNEL|copyCode"
@@ -299,8 +363,50 @@ function log(msg, type) {
   el.scrollTop = el.scrollHeight;
 }
 function setProgress(pct) {
-  document.getElementById('progress-bar').style.width = pct + '%';
-  document.getElementById('overlay-bar').style.width  = pct + '%';
+  var p = Math.round(pct);
+  document.getElementById('progress-bar').style.width = p + '%';
+  document.getElementById('overlay-bar').style.width  = p + '%';
+  // Update the % label in the progress-bar wrap (below main UI)
+  var pp = document.getElementById('progress-pct');
+  if (pp) { pp.textContent = p + '%'; pp.classList.toggle('visible', p > 0 && p < 100); }
+  // Update header meta %
+  var ph = document.getElementById('overlay-pct-hdr');
+  var meta = document.getElementById('overlay-meta');
+  if (ph) ph.textContent = p + '%';
+  if (meta) meta.classList.toggle('visible', p > 0 && p < 100);
+}
+
+// ── Export timer ──────────────────────────────────────────────────────────────
+var _timerInterval = null;
+var _timerStart    = 0;
+
+function startTimer() {
+  _timerStart = Date.now();
+  var el = document.getElementById('overlay-timer');
+  if (_timerInterval) clearInterval(_timerInterval);
+  _timerInterval = setInterval(function() {
+    var s = Math.floor((Date.now() - _timerStart) / 1000);
+    if (el) el.textContent = s < 60 ? s + 's' : Math.floor(s/60) + ':' + ('0' + (s%60)).slice(-2);
+  }, 1000);
+}
+
+function stopTimer() {
+  if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
+}
+
+function resetOverlay() {
+  stopTimer();
+  setProgress(0);
+  document.getElementById('overlay-title').textContent  = 'Exporting…';
+  document.getElementById('overlay-meta').classList.remove('visible');
+  document.getElementById('overlay-timer').textContent  = '0s';
+  document.getElementById('overlay-pct-hdr').textContent = '0%';
+  document.getElementById('overlay-close').style.display     = 'none';
+  document.getElementById('btn-stop-export').style.display   = 'none';
+  document.getElementById('overlay-footer').style.display    = 'none';
+  document.getElementById('btn-overlay-download').disabled   = true;
+  document.getElementById('btn-overlay-download').textContent = '⬇ Download ZIP';
+  document.getElementById('overlay-log').innerHTML = '';
 }
 
 function updateExportBtn() {
@@ -335,6 +441,11 @@ function getSettings() {
 }
 
 // ── Build the canonical file/folder name for a given banner size ──────────────
+function verticalLabel(code) {
+  var map = { 'C':'Casino', 'S':'Sports', 'D':'Dual', 'CS':'Casino & Sports', 'SC':'Sports & Casino' };
+  return map[(code || '').toUpperCase()] || code || 'Display';
+}
+
 // e.g. BA_2026_C_W3_TOP_LNY01_DISPLAY_DYN_20260319_300x250
 // overrides: optional { funnel, copyCode } — from section data, takes precedence
 function buildCanonicalName(settings, spec, overrides) {
@@ -368,8 +479,7 @@ function renderBanners(banners) {
     chip.className = 'size-chip';
     chip.innerHTML =
       '<input type="checkbox" id="cb-' + key + '" value="' + key + '" checked>' +
-      '<label for="cb-' + key + '">' + key + '</label>' +
-      '<span class="badge">' + n + 's</span>';
+      '<label for="cb-' + key + '">' + key + '</label>';
     chip.querySelector('input').addEventListener('change', function(){ updateSizesToggleBtn(); updateExportBtn(); });
     list.appendChild(chip);
   });
@@ -549,27 +659,35 @@ function renderVideoPickers(sections) {
     inp.type   = 'file';
     inp.accept = '.mp4,video/mp4';
 
+    var btn = document.createElement('button');
+    btn.type      = 'button';
+    btn.className = 'vid-pick-btn';
+    btn.textContent = 'Choose .mp4…';
+    btn.addEventListener('click', function() { inp.click(); });
+
     var hintEl = document.createElement('span');
     hintEl.className = 'vid-hint';
     hintEl.textContent = '.mp4';
 
-    inp.addEventListener('change', (function(k, h) {
+    inp.addEventListener('change', (function(k, h, b) {
       return function(e) {
         var file = e.target.files && e.target.files[0];
-        if (!file) { delete videosBySection[k]; h.textContent = '.mp4'; h.className = 'vid-hint'; return; }
+        if (!file) { delete videosBySection[k]; b.textContent = 'Choose .mp4…'; h.textContent = '.mp4'; h.className = 'vid-hint'; h.style.display = ''; return; }
         var reader = new FileReader();
         reader.onload = function(ev) {
           var raw = ev.target.result, ci = raw.indexOf(',');
           videosBySection[k] = ci >= 0 ? raw.slice(ci + 1) : raw;
-          h.textContent = '✓ ' + file.name;
-          h.className = 'vid-hint ok';
+          b.textContent = '✓ ' + file.name;
+          b.classList.add('loaded');
+          h.style.display = 'none';
           log('Video loaded for funnel ' + k + ': ' + file.name + ' (' + formatSize(file.size) + ')', 'ok');
         };
         reader.readAsDataURL(file);
       };
-    })(key, hintEl));
+    })(key, hintEl, btn));
 
     col.appendChild(inp);
+    col.appendChild(btn);
     col.appendChild(hintEl);
     list.appendChild(col);
   });
@@ -646,8 +764,9 @@ document.getElementById('video-file-input').addEventListener('change', function(
     var commaIdx = dataUrl.indexOf(',');
     selectedVideoBase64 = commaIdx >= 0 ? dataUrl.slice(commaIdx + 1) : dataUrl;
     log('Video file loaded: ' + file.name + ' (' + formatSize(file.size) + ')', 'ok');
-    document.getElementById('video-file-hint').textContent = '✓ ' + file.name;
-    document.getElementById('video-file-hint').style.color = '#4ade80';
+    var _sb = document.querySelector('.vid-single-btn');
+    if (_sb) { _sb.textContent = '✓ ' + file.name; _sb.classList.add('loaded'); }
+    document.getElementById('video-file-hint').style.display = 'none';
   };
   reader.onerror = function() {
     selectedVideoBase64 = null;
@@ -709,18 +828,22 @@ document.getElementById('folder-input').addEventListener('change', function(e) {
 // ── Reset all video fields to their original empty state ─────────────────────
 function resetVideoFields() {
   videosBySection = {};
-  // Reset per-funnel hint labels
+  // Reset per-funnel pickers
   document.querySelectorAll('#video-pickers-list .vid-col').forEach(function(col) {
     var inp  = col.querySelector('input[type=file]');
+    var btn  = col.querySelector('.vid-pick-btn');
     var hint = col.querySelector('.vid-hint');
     if (inp)  inp.value = '';
-    if (hint) { hint.textContent = '.mp4'; hint.className = 'vid-hint'; }
+    if (btn)  { btn.textContent = 'Choose .mp4…'; btn.classList.remove('loaded'); }
+    if (hint) { hint.textContent = '.mp4'; hint.className = 'vid-hint'; hint.style.display = ''; }
   });
   // Reset single picker
   var singleInp  = document.getElementById('video-file-input');
+  var singleBtn  = document.querySelector('.vid-single-btn');
   var singleHint = document.getElementById('video-file-hint');
   if (singleInp)  singleInp.value = '';
-  if (singleHint) { singleHint.textContent = 'For banners with a video layer'; singleHint.style.color = ''; }
+  if (singleBtn)  { singleBtn.textContent = 'Choose .mp4…'; singleBtn.classList.remove('loaded'); }
+  if (singleHint) { singleHint.textContent = 'For banners with a video layer'; singleHint.style.color = ''; singleHint.style.display = ''; }
   selectedVideoBase64 = null;
 }
 
@@ -763,13 +886,14 @@ function autoLoadVideos(executionType) {
     reader.onload = function(ev) {
       var raw = ev.target.result, ci = raw.indexOf(',');
       videosBySection[funnel] = ci >= 0 ? raw.slice(ci + 1) : raw;
-      // Update the matching hint label in the Video Files panel
+      // Update the matching button + hint in the Video Files panel
       document.querySelectorAll('#video-pickers-list .vid-col').forEach(function(col) {
         var hdr  = col.querySelector('.sec-col-hdr');
+        var btn  = col.querySelector('.vid-pick-btn');
         var hint = col.querySelector('.vid-hint');
-        if (hdr && hdr.textContent.trim() === funnel && hint) {
-          hint.textContent = '✓ ' + file.name;
-          hint.className   = 'vid-hint ok';
+        if (hdr && hdr.textContent.trim() === funnel) {
+          if (btn)  { btn.textContent = '✓ ' + file.name; btn.classList.add('loaded'); }
+          if (hint) { hint.style.display = 'none'; }
         }
       });
       log('Auto-loaded video for ' + funnel + ': ' + file.name + ' (' + formatSize(file.size) + ')', 'ok');
@@ -803,11 +927,10 @@ document.getElementById('btn-export').addEventListener('click', function() {
   document.getElementById('btn-dl-all').style.display = 'none';
 
   // Show export overlay
-  document.getElementById('overlay-log').innerHTML = '';
-  document.getElementById('overlay-bar').style.width = '0';
-  document.getElementById('overlay-title').textContent = 'Exporting…';
-  document.getElementById('overlay-close').style.display = 'none';
+  resetOverlay();
+  document.getElementById('btn-stop-export').style.display = 'block';
   document.getElementById('export-overlay').classList.add('active');
+  startTimer();
   allExportedBlobs = [];
   allBannerData    = [];
   setProgress(5);
@@ -1102,7 +1225,7 @@ function generateBannerHTML(result, settings, overrides, assetMap) {
     '<meta charset="utf-8">\n' +
     '<meta http-equiv="X-UA-Compatible" content="IE=edge">\n' +
     '<meta name="ad.size" content="width=' + W + ',height=' + H + '">\n' +
-    '<title>' + bannerTitle + '</title>\n' +
+    '<title>' + verticalLabel(settings.ncVertical) + '</title>\n' +
     '<style>\n' + css + '</style>\n' +
     '</head>\n<body>\n<div id="b">\n' +
     divs +
@@ -1166,9 +1289,10 @@ async function buildZip(result, settings, overrides) {
 }
 
 // ── Generate preview.html for a funnel/copyCode group ────────────────────────
-function generatePreviewHTML(funnel, copyCode, banners) {
-  var ORDER   = ['300x600', '160x600', '320x480', '300x250', '320x50', '300x50', '728x90'];
-  var STACKED = ['300x250', '320x50', '300x50'];
+function generatePreviewHTML(funnel, copyCode, banners, vertLabel) {
+  var ORDER        = ['300x600', '160x600', '320x480', '300x250', '320x50', '300x50', '728x90'];
+  var STACKED      = ['300x250', '320x50', '300x50'];
+  var RIGHT_BLOCK  = ['320x480', '300x250', '320x50', '300x50', '728x90'];
 
   // Sort by defined order; unknown sizes go last
   banners = banners.slice().sort(function(a, b) {
@@ -1188,36 +1312,53 @@ function generatePreviewHTML(funnel, copyCode, banners) {
       '</div>';
   }
 
-  // Split into: main row, stacked group, bottom row (728x90)
-  var mainRow      = [];
-  var stackedGroup = [];
-  var bottomRow    = [];
+  // Split into: left (300x600, 160x600), right-top-main (320x480),
+  //             right-top-stacked (300x250, 320x50, 300x50), right-bottom (728x90)
+  var leftRow       = [];
+  var rightTopMain  = [];
+  var rightStacked  = [];
+  var rightBottom   = [];
   banners.forEach(function(b) {
     if (b.sizeKey === '728x90') {
-      bottomRow.push(b);
+      rightBottom.push(b);
     } else if (STACKED.indexOf(b.sizeKey) !== -1) {
-      stackedGroup.push(b);
+      rightStacked.push(b);
+    } else if (RIGHT_BLOCK.indexOf(b.sizeKey) !== -1) {
+      rightTopMain.push(b);
     } else {
-      mainRow.push(b);
+      leftRow.push(b);
     }
   });
 
-  var mainHTML    = mainRow.map(bannerItemHTML).join('\n    ');
-  var stackedHTML = stackedGroup.length
-    ? '<div class="banner-stack">\n      ' + stackedGroup.map(bannerItemHTML).join('\n      ') + '\n    </div>'
+  var leftHTML       = leftRow.map(bannerItemHTML).join('\n    ');
+  var rightTopHTML   = rightTopMain.map(bannerItemHTML).join('\n      ');
+  var rightStackHTML = rightStacked.length
+    ? '<div class="banner-stack">\n        ' + rightStacked.map(bannerItemHTML).join('\n        ') + '\n      </div>'
     : '';
-  var bottomHTML  = bottomRow.map(bannerItemHTML).join('\n    ');
+  var rightBotHTML   = rightBottom.map(bannerItemHTML).join('\n      ');
+
+  var rightColHTML = (rightTopHTML || rightStackHTML || rightBotHTML)
+    ? '<div class="right-col">\n' +
+      (rightTopHTML || rightStackHTML
+        ? '    <div class="right-row">\n      ' + rightTopHTML + '\n      ' + rightStackHTML + '\n    </div>\n'
+        : '') +
+      (rightBotHTML ? '    <div class="right-bot">\n      ' + rightBotHTML + '\n    </div>\n' : '') +
+      '  </div>'
+    : '';
 
   return '<!DOCTYPE html>\n<html>\n<head>\n' +
     '<meta charset="utf-8">\n' +
-    '<title>Preview \u2013 ' + funnel + ' / ' + copyCode + '</title>\n' +
+    '<title>' + (vertLabel || 'Preview') + ' \u2013 ' + funnel + ' / ' + copyCode + '</title>\n' +
     '<style>\n' +
     '* { box-sizing: border-box; margin: 0; padding: 0; }\n' +
     'body { background: #111; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #fff; padding: 40px; min-height: 100vh; }\n' +
     '.header { margin-bottom: 36px; }\n' +
     '.header-code { font-size: 22px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: #fff; }\n' +
     '.header-funnel { font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: #444; margin-top: 6px; }\n' +
-    '.banners { display: flex; flex-wrap: nowrap; gap: 24px; align-items: flex-end; margin-bottom: 24px; }\n' +
+    '.banners { display: flex; flex-wrap: nowrap; gap: 24px; align-items: flex-start; }\n' +
+    '.right-col { display: flex; flex-direction: column; gap: 8px; }\n' +
+    '.right-row { display: flex; flex-wrap: nowrap; gap: 24px; align-items: flex-start; }\n' +
+    '.right-bot { display: flex; }\n' +
     '.banner-stack { display: flex; flex-direction: column; gap: 16px; }\n' +
     '.banner-item { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }\n' +
     '.banner-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #555; }\n' +
@@ -1228,8 +1369,7 @@ function generatePreviewHTML(funnel, copyCode, banners) {
     '  <div class="header-code">' + copyCode + '</div>\n' +
     '  <div class="header-funnel">' + funnel + '</div>\n' +
     '</div>\n' +
-    '<div class="banners">\n    ' + mainHTML + '\n    ' + stackedHTML + '\n</div>\n' +
-    (bottomHTML ? '<div class="banners">\n    ' + bottomHTML + '\n</div>\n' : '') +
+    '<div class="banners">\n  ' + leftHTML + '\n  ' + rightColHTML + '\n</div>\n' +
     '</body>\n</html>';
 }
 
@@ -1269,7 +1409,7 @@ async function handleExportComplete(results, settings, errors) {
     } : null;
 
     try {
-      setProgress(10 + (done / total) * 80);
+      setProgress(85 + (done / total) * 10);
       var label = result.sectionName ? result.sectionName + ' / ' + result.sizeKey : result.sizeKey;
       log('  Building ZIP for ' + label + '…', 'info');
       var blob     = await buildZip(result, settings, overrides);
@@ -1311,12 +1451,17 @@ async function handleExportComplete(results, settings, errors) {
   document.getElementById('btn-export').disabled = false;
 
   // Update overlay header
+  stopTimer();
+  var elapsed = Math.floor((Date.now() - _timerStart) / 1000);
+  var elapsedStr = elapsed < 60 ? elapsed + 's' : Math.floor(elapsed/60) + ':' + ('0' + (elapsed%60)).slice(-2);
   document.getElementById('overlay-title').textContent = done > 0
-    ? '✓ Done — ' + done + ' banner(s) ready'
-    : '⚠ Export finished with errors';
-  document.getElementById('overlay-close').style.display = 'block';
+    ? '✓ Done — ' + done + ' banner(s) ready · ' + elapsedStr
+    : '⚠ Export finished with errors · ' + elapsedStr;
+  document.getElementById('overlay-meta').classList.remove('visible');
+  document.getElementById('btn-stop-export').style.display = 'none';
+  document.getElementById('overlay-close').style.display   = 'block';
 
-  // Auto-download master ZIP
+  // Build master ZIP and arm the Download button — user decides when to save
   if (done > 0) {
     try {
       log('\nPackaging master ZIP…', 'info');
@@ -1325,13 +1470,16 @@ async function handleExportComplete(results, settings, errors) {
       var masterParts = ['BA', year];
       if (s.ncVertical) masterParts.push(s.ncVertical);
       masterParts.push(s.ncCampaign, s.ncDate, 'ALL_BANNERS');
-      var masterName = masterParts.join('_') + '.zip';
-      var masterBlob = await buildStructuredMasterZip();
-      var masterUrl  = URL.createObjectURL(masterBlob);
-      var a = document.createElement('a');
-      a.href = masterUrl; a.download = masterName; a.click();
-      URL.revokeObjectURL(masterUrl);
-      log('⬇ Saving ' + masterName + ' (' + formatSize(masterBlob.size) + ')', 'ok');
+      pendingMasterName = masterParts.join('_') + '.zip';
+      pendingMasterBlob = await buildStructuredMasterZip();
+      log('✓ Master ZIP ready — ' + formatSize(pendingMasterBlob.size) + '. Click Download when ready.', 'ok');
+
+      var dlBtn  = document.getElementById('btn-overlay-download');
+      var footer = document.getElementById('overlay-footer');
+      var info   = document.getElementById('overlay-footer-info');
+      info.textContent = pendingMasterName + '  ·  ' + formatSize(pendingMasterBlob.size);
+      dlBtn.disabled = false;
+      footer.style.display = 'flex';
     } catch(ze) {
       log('⚠ Could not build master ZIP: ' + ze.message, 'warn');
     }
@@ -1346,14 +1494,50 @@ window.addEventListener('message', async function(ev) {
     case 'scan-result':    renderScanResult(msg); break;
     case 'progress':       log(msg.message, 'info'); break;
     case 'warning':        log(msg.message, 'warn'); break;
+    case 'export-total':
+      exportTotal = msg.total || 0;
+      exportDone  = 0;
+      setProgress(5);
+      break;
+    case 'export-tick':
+      exportDone++;
+      if (exportTotal > 0) setProgress(5 + (exportDone / exportTotal) * 80);
+      break;
     case 'error':          log(msg.message, 'err');  break;
     case 'export-complete': await handleExportComplete(msg.results, msg.settings, msg.errors); break;
   }
 });
 
+// ── Stop export ───────────────────────────────────────────────────────────────
+document.getElementById('btn-stop-export').addEventListener('click', function() {
+  parent.postMessage({ pluginMessage: { type: 'stop' } }, '*');
+  stopTimer();
+  isExporting = false;
+  document.getElementById('btn-export').disabled = false;
+  document.getElementById('export-overlay').classList.remove('active');
+  resetOverlay();
+  log('Export stopped by user.', 'warn');
+});
+
 // ── Export overlay close ──────────────────────────────────────────────────────
 document.getElementById('overlay-close').addEventListener('click', function() {
   document.getElementById('export-overlay').classList.remove('active');
+  document.getElementById('overlay-footer').style.display = 'none';
+  document.getElementById('btn-overlay-download').disabled = true;
+});
+
+// ── Overlay download button ───────────────────────────────────────────────────
+document.getElementById('btn-overlay-download').addEventListener('click', function() {
+  if (!pendingMasterBlob) return;
+  var url = URL.createObjectURL(pendingMasterBlob);
+  var a = document.createElement('a');
+  a.href = url; a.download = pendingMasterName; a.click();
+  URL.revokeObjectURL(url);
+  pendingMasterBlob = null;
+  pendingMasterName = '';
+  var btn = document.getElementById('btn-overlay-download');
+  btn.textContent = '✓ Downloaded';
+  btn.disabled = true;
 });
 
 // ── Structured master ZIP builder ─────────────────────────────────────────────
@@ -1385,19 +1569,22 @@ async function buildStructuredMasterZip() {
       previews.push({ canonicalName: cName, sizeKey: bd.result.sizeKey });
     }
 
-    copyFolder.file('preview.html', generatePreviewHTML(grp.funnel, grp.copyCode, previews));
-    allGroupsPreview.push({ funnel: grp.funnel, copyCode: grp.copyCode, banners: previews });
+    var _vl = grp.items.length ? verticalLabel(grp.items[0].settings.ncVertical) : 'Display';
+    copyFolder.file('preview.html', generatePreviewHTML(grp.funnel, grp.copyCode, previews, _vl));
+    allGroupsPreview.push({ funnel: grp.funnel, copyCode: grp.copyCode, banners: previews, vertLabel: _vl });
   }
 
-  master.file('preview.html', generateRootPreviewHTML(allGroupsPreview));
+  var _rootVL = allGroupsPreview.length ? (allGroupsPreview[0].vertLabel || 'Display') : 'Display';
+  master.file('preview.html', generateRootPreviewHTML(allGroupsPreview, _rootVL));
 
   return await master.generateAsync({ type: 'blob', compression: 'DEFLATE' });
 }
 
 // ── Root preview.html (tabs per funnel, pills per copyCode) ──────────────────
-function generateRootPreviewHTML(allGroups) {
-  var ORDER   = ['300x600', '160x600', '320x480', '300x250', '320x50', '300x50', '728x90'];
-  var STACKED = ['300x250', '320x50', '300x50'];
+function generateRootPreviewHTML(allGroups, vertLabel) {
+  var ORDER       = ['300x600', '160x600', '320x480', '300x250', '320x50', '300x50', '728x90'];
+  var STACKED     = ['300x250', '320x50', '300x50'];
+  var RIGHT_BLOCK = ['320x480', '300x250', '320x50', '300x50', '728x90'];
 
   function bannerItemHTML(b, prefix) {
     var parts = b.sizeKey.split('x');
@@ -1417,19 +1604,28 @@ function generateRootPreviewHTML(allGroups) {
       var bi = ORDER.indexOf(b.sizeKey); if (bi === -1) bi = 999;
       return ai - bi;
     });
-    var mainRow = [], stackedGroup = [], bottomRow = [];
+    var leftRow = [], rightTopMain = [], rightStacked = [], rightBottom = [];
     banners.forEach(function(b) {
-      if (b.sizeKey === '728x90')              bottomRow.push(b);
-      else if (STACKED.indexOf(b.sizeKey) !== -1) stackedGroup.push(b);
-      else                                        mainRow.push(b);
+      if (b.sizeKey === '728x90')                   rightBottom.push(b);
+      else if (STACKED.indexOf(b.sizeKey) !== -1)   rightStacked.push(b);
+      else if (RIGHT_BLOCK.indexOf(b.sizeKey) !== -1) rightTopMain.push(b);
+      else                                            leftRow.push(b);
     });
-    var mainHTML    = mainRow.map(function(b) { return bannerItemHTML(b, prefix); }).join('\n    ');
-    var stackedHTML = stackedGroup.length
-      ? '<div class="banner-stack">\n      ' + stackedGroup.map(function(b) { return bannerItemHTML(b, prefix); }).join('\n      ') + '\n    </div>'
+    var leftHTML       = leftRow.map(function(b) { return bannerItemHTML(b, prefix); }).join('\n    ');
+    var rightTopHTML   = rightTopMain.map(function(b) { return bannerItemHTML(b, prefix); }).join('\n      ');
+    var rightStackHTML = rightStacked.length
+      ? '<div class="banner-stack">\n        ' + rightStacked.map(function(b) { return bannerItemHTML(b, prefix); }).join('\n        ') + '\n      </div>'
       : '';
-    var bottomHTML  = bottomRow.map(function(b) { return bannerItemHTML(b, prefix); }).join('\n    ');
-    return '<div class="banners">\n    ' + mainHTML + (stackedHTML ? '\n    ' + stackedHTML : '') + '\n</div>' +
-      (bottomHTML ? '\n<div class="banners">\n    ' + bottomHTML + '\n</div>' : '');
+    var rightBotHTML   = rightBottom.map(function(b) { return bannerItemHTML(b, prefix); }).join('\n      ');
+    var rightColHTML   = (rightTopHTML || rightStackHTML || rightBotHTML)
+      ? '<div class="right-col">\n' +
+        (rightTopHTML || rightStackHTML
+          ? '    <div class="right-row">\n      ' + rightTopHTML + '\n      ' + rightStackHTML + '\n    </div>\n'
+          : '') +
+        (rightBotHTML ? '    <div class="right-bot">\n      ' + rightBotHTML + '\n    </div>\n' : '') +
+        '  </div>'
+      : '';
+    return '<div class="banners">\n  ' + leftHTML + '\n  ' + rightColHTML + '\n</div>';
   }
 
   // Build funnel map preserving insertion order
@@ -1473,7 +1669,10 @@ function generateRootPreviewHTML(allGroups) {
     '.pill { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 20px; padding: 5px 16px; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #555; cursor: pointer; transition: all .15s; }\n' +
     '.pill:hover { border-color: #444; color: #ccc; }\n' +
     '.pill.active { background: #fff; border-color: #fff; color: #111; }\n' +
-    '.banners { display: flex; flex-wrap: nowrap; gap: 24px; align-items: flex-end; margin-bottom: 24px; }\n' +
+    '.banners { display: flex; flex-wrap: nowrap; gap: 24px; align-items: flex-start; margin-bottom: 24px; }\n' +
+    '.right-col { display: flex; flex-direction: column; gap: 8px; }\n' +
+    '.right-row { display: flex; flex-wrap: nowrap; gap: 24px; align-items: flex-start; }\n' +
+    '.right-bot { display: flex; }\n' +
     '.banner-stack { display: flex; flex-direction: column; gap: 16px; }\n' +
     '.banner-item { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }\n' +
     '.banner-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #555; }\n' +
@@ -1497,10 +1696,10 @@ function generateRootPreviewHTML(allGroups) {
     '}';
 
   return '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="utf-8">\n' +
-    '<title>Banner Preview</title>\n' +
+    '<title>' + (vertLabel || 'Banner Preview') + '</title>\n' +
     '<style>\n' + css + '\n</style>\n' +
     '</head>\n<body>\n' +
-    '<div class="header"><div class="header-title">Banner Preview</div></div>\n' +
+    '<div class="header"><div class="header-title">' + (vertLabel || 'Banner Preview') + '</div></div>\n' +
     '<div class="tabs">\n  ' + tabsHTML + '\n</div>\n' +
     '<div class="pills" id="pills">\n  ' + initialPillsHTML + '\n</div>\n' +
     '<div id="content">\n' + (firstFunnel && firstCode ? funnelMap[firstFunnel][firstCode] : '') + '\n</div>\n' +
@@ -1573,6 +1772,223 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 window.addEventListener('load', function() { setTimeout(scan, 300); });
+
+// ── Help overlay ─────────────────────────────────────────────────────────────
+document.getElementById('btn-help').addEventListener('click', function() {
+  var iframe = document.getElementById('help-iframe');
+  if (!iframe.srcdoc) {
+    var src = document.getElementById('help-src');
+    if (src) iframe.srcdoc = src.textContent;
+  }
+  document.getElementById('help-overlay').classList.add('active');
+});
+document.getElementById('btn-help-close').addEventListener('click', function() {
+  document.getElementById('help-overlay').classList.remove('active');
+});
 </script>
+
+<script type="text/x-help" id="help-src">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BA Banner Generator – Help</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#07071a; --bg-2:#0d0d1f; --bg-3:#12122a;
+    --border:#1e1e3a; --border-hi:#2a2a4a;
+    --text:#f0f0f8; --text-2:#a0a0c0; --text-3:#606080;
+    --purple:#7c3aed; --purple-lt:#a78bfa;
+    --green:#4ade80; --warn:#fbbf24; --pink:#f472b6;
+  }
+  html,body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:13px; line-height:1.6; height:100%; overflow-x:hidden; }
+  body { padding:28px 24px 48px; max-width:640px; margin:0 auto; }
+  h1 { font-size:20px; font-weight:800; color:var(--text); letter-spacing:-.01em; margin-bottom:4px; }
+  h2 { font-size:13px; font-weight:700; color:var(--purple-lt); text-transform:uppercase; letter-spacing:.1em; margin:36px 0 12px; display:flex; align-items:center; gap:8px; }
+  h2::after { content:''; flex:1; height:1px; background:var(--border); }
+  h3 { font-size:12px; font-weight:700; color:var(--text); margin:16px 0 6px; }
+  p  { color:var(--text-2); margin-bottom:10px; }
+  a  { color:var(--purple-lt); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  code { font-family:'SF Mono',Menlo,monospace; font-size:11px; background:var(--bg-3); border:1px solid var(--border); border-radius:3px; padding:1px 5px; color:var(--green); }
+  .hero { margin-bottom:8px; }
+  .hero-sub { color:var(--text-3); font-size:12px; }
+  .badge { display:inline-block; background:var(--purple); color:#fff; font-size:10px; font-weight:700; letter-spacing:.08em; padding:2px 7px; border-radius:20px; vertical-align:middle; margin-left:6px; }
+  .steps { display:flex; flex-direction:column; gap:8px; }
+  .step { display:flex; gap:12px; align-items:flex-start; background:var(--bg-3); border:1px solid var(--border); border-radius:7px; padding:10px 12px; }
+  .step-num { flex-shrink:0; width:22px; height:22px; border-radius:50%; background:var(--purple); color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .step-body { flex:1; }
+  .step-title { font-weight:700; color:var(--text); font-size:12px; margin-bottom:2px; }
+  .step-desc  { color:var(--text-2); font-size:12px; }
+  table { width:100%; border-collapse:collapse; margin-bottom:4px; }
+  thead tr { background:var(--bg-3); }
+  th { font-size:10px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:.08em; padding:7px 10px; text-align:left; border-bottom:1px solid var(--border-hi); }
+  td { font-size:12px; color:var(--text-2); padding:7px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+  td:first-child { font-family:'SF Mono',Menlo,monospace; color:var(--green); font-size:11px; white-space:nowrap; }
+  tr:last-child td { border-bottom:none; }
+  .table-wrap { background:var(--bg-3); border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:12px; }
+  .callout { border-radius:7px; padding:10px 14px; margin-bottom:12px; display:flex; gap:10px; align-items:flex-start; }
+  .callout-icon { font-size:16px; flex-shrink:0; line-height:1.4; }
+  .callout-body { flex:1; font-size:12px; color:var(--text-2); line-height:1.55; }
+  .callout-body strong { color:var(--text); }
+  .callout.info { background:#0f0f2e; border:1px solid #2a2a5a; }
+  .callout.warn { background:#1a1200; border:1px solid #3a2800; }
+  .callout.tip  { background:#001a0f; border:1px solid #003320; }
+  .filename { display:flex; flex-wrap:wrap; gap:3px; margin-bottom:12px; }
+  .fn-seg { padding:3px 8px; border-radius:4px; font-family:'SF Mono',Menlo,monospace; font-size:11px; font-weight:600; }
+  .fn-sep { color:var(--text-3); align-self:center; font-weight:700; }
+  .fn-brand    { background:#1a0a2e; color:#c084fc; border:1px solid #3b1f6a; }
+  .fn-year     { background:#0a1a2e; color:#60a5fa; border:1px solid #1f3f6a; }
+  .fn-vertical { background:#0a2e1a; color:var(--green); border:1px solid #1f6a3f; }
+  .fn-campaign { background:#2e1a0a; color:#fb923c; border:1px solid #6a3f1f; }
+  .fn-funnel   { background:#2e0a1a; color:var(--pink); border:1px solid #6a1f3f; }
+  .fn-copy     { background:#1a2e0a; color:#a3e635; border:1px solid #3f6a1f; }
+  .fn-channel  { background:#0a2e2e; color:#22d3ee; border:1px solid #1f5a5a; }
+  .fn-type     { background:#1a1a0a; color:#fde68a; border:1px solid #5a5a1f; }
+  .fn-date     { background:#2e0a2e; color:#e879f9; border:1px solid #6a1f6a; }
+  .fn-size     { background:#1a1a1a; color:#9ca3af; border:1px solid #3a3a3a; }
+  .cp-diagram { background:var(--bg-3); border:1px solid var(--border-hi); border-radius:7px; padding:14px 16px; margin-bottom:12px; }
+  .cp-section-label { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--purple-lt); margin-bottom:8px; }
+  .cp-fields { display:flex; gap:10px; flex-wrap:wrap; }
+  .cp-field { background:var(--bg); border:1px dashed var(--border-hi); border-radius:5px; padding:7px 12px; }
+  .cp-field-name { font-size:10px; color:var(--text-3); margin-bottom:3px; font-family:'SF Mono',Menlo,monospace; }
+  .cp-field-val  { font-size:13px; font-weight:700; color:var(--green); }
+  .cta-row { display:flex; gap:10px; margin-top:8px; }
+  .btn-primary { display:inline-flex; align-items:center; gap:6px; background:var(--purple); color:#fff; border:none; border-radius:6px; padding:9px 18px; font-size:12px; font-weight:700; cursor:pointer; text-decoration:none; }
+  .btn-primary:hover { opacity:.85; text-decoration:none; }
+  .btn-ghost { display:inline-flex; align-items:center; gap:6px; background:transparent; color:var(--text-2); border:1px solid var(--border-hi); border-radius:6px; padding:9px 18px; font-size:12px; font-weight:600; cursor:pointer; text-decoration:none; }
+  .btn-ghost:hover { opacity:.85; text-decoration:none; }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>BA Banner Generator <span class="badge">v1.5</span></h1>
+  <p class="hero-sub">Converts Figma banner frames into production-ready HTML5 animated banners, packaged as a ZIP ready for trafficking.</p>
+</div>
+
+<h2>What it does</h2>
+<p>The plugin scans the current Figma page, finds banner frames organised by size (<code>300x250</code>, <code>728x90</code>, etc.), exports every layer as a PNG, and builds an animated HTML5 banner that cross-fades between scenes. If your file uses <strong>Sections</strong> (one per funnel/copy variation), it exports a separate banner per section and packages everything into a structured master ZIP with preview pages.</p>
+
+<h2>Figma file structure</h2>
+<h3>Banner frames</h3>
+<p>Each banner size lives in its own Figma frame, named exactly by its pixel dimensions:</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Frame name</th><th>Size</th></tr></thead>
+  <tbody>
+    <tr><td>300x600</td><td>300 × 600 px — Half Page</td></tr>
+    <tr><td>160x600</td><td>160 × 600 px — Wide Skyscraper</td></tr>
+    <tr><td>320x480</td><td>320 × 480 px — Interstitial</td></tr>
+    <tr><td>300x250</td><td>300 × 250 px — MPU</td></tr>
+    <tr><td>728x90</td><td>728 × 90 px — Leaderboard</td></tr>
+    <tr><td>320x50</td><td>320 × 50 px — Mobile Banner</td></tr>
+    <tr><td>300x50</td><td>300 × 50 px — Mobile Banner</td></tr>
+  </tbody>
+</table></div>
+<h3>Multiple scenes</h3>
+<p>To create an animated banner with multiple scenes, place several frames of the <strong>same size</strong> side by side on the page. The plugin detects them automatically and cross-fades between them.</p>
+<div class="callout info"><span class="callout-icon">💡</span><div class="callout-body">Scene frames don't need special names — the plugin groups all frames of the same size together. Just keep them on the same page.</div></div>
+<h3>Sections (multi-funnel exports)</h3>
+<p>Wrap your banner frames inside a Figma <strong>Section</strong> to produce separate exports per funnel and copy variation. Name each section using the format <code>FUNNEL_COPYCODE</code>:</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Section name</th><th>Funnel</th><th>Copy code</th></tr></thead>
+  <tbody>
+    <tr><td>TOF_LNY01</td><td>TOF — Top of Funnel</td><td>LNY01</td></tr>
+    <tr><td>MOF_LNY01</td><td>MOF — Middle of Funnel</td><td>LNY01</td></tr>
+    <tr><td>BOF_LNY01</td><td>BOF — Bottom of Funnel</td><td>LNY01</td></tr>
+  </tbody>
+</table></div>
+
+<h2>Control Panel</h2>
+<p>The plugin reads campaign metadata directly from a Figma <strong>Section</strong> named <code>Control Panel</code> (case-insensitive) placed anywhere on the page. Inside it, add TEXT layers with these exact names:</p>
+<div class="cp-diagram">
+  <div class="cp-section-label">🗂 Control Panel <span style="color:var(--text-3);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0">(Figma Section)</span></div>
+  <div class="cp-fields">
+    <div class="cp-field"><div class="cp-field-name">vertical</div><div class="cp-field-val">C</div></div>
+    <div class="cp-field"><div class="cp-field-name">campaign</div><div class="cp-field-val">LNY</div></div>
+  </div>
+</div>
+<div class="table-wrap"><table>
+  <thead><tr><th>TEXT layer name</th><th>What to type</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>vertical</td><td>Single letter vertical code</td><td><code>C</code> Casino · <code>S</code> Sports · <code>D</code> Dual</td></tr>
+    <tr><td>campaign</td><td>Campaign short code</td><td><code>LNY</code> · <code>W3</code> · <code>XMAS</code></td></tr>
+  </tbody>
+</table></div>
+<div class="callout warn"><span class="callout-icon">⚠️</span><div class="callout-body"><strong>The Section must be named exactly "Control Panel"</strong> (any case). The TEXT layers inside must be named exactly <code>vertical</code> and <code>campaign</code>. If missing, those fields will be blank in the exported filename.</div></div>
+
+<h2>Layer naming rules</h2>
+<p>The plugin assigns a role to each layer based on its name. Get the names right and everything animates, pulses and composites correctly.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Layer name</th><th>Role</th><th>Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td>Master (1)<br>Master (2)…</td><td>Scene background</td><td>Cross-fades between scenes. One per frame.</td></tr>
+    <tr><td>CTA TOF<br>CTA MOF<br>CTA BOF</td><td>Call-to-action button</td><td>Always visible, pulses with a scale animation.</td></tr>
+    <tr><td>CTA + Logo</td><td>Combined group</td><td>Expanded into Logo + CTA sub-layers automatically.</td></tr>
+    <tr><td>BA_Logo · Logo</td><td>Logo</td><td>Always visible, no animation.</td></tr>
+    <tr><td>Shadow Right<br>Shadow Top<br>Shadow Bottom</td><td>Shadow overlay</td><td>Composited PNG, always above the video layer.</td></tr>
+    <tr><td>Gradient · Gradiente<br>Overlay_*</td><td>Gradient overlay</td><td>Same as shadow — composited, always visible.</td></tr>
+    <tr><td>video.webm</td><td>Video placeholder</td><td>Replaced by the MP4 loaded in the Video Files panel.</td></tr>
+    <tr><td>T&amp;C Apply</td><td>Legal text</td><td>Static, vertically centred on leaderboard and mobile sizes.</td></tr>
+  </tbody>
+</table></div>
+<div class="callout tip"><span class="callout-icon">✅</span><div class="callout-body"><strong>Tip:</strong> Layer names are case-insensitive. <code>CTA BOF</code>, <code>cta bof</code> and <code>Cta Bof</code> all work the same way.</div></div>
+
+<h2>Step-by-step workflow</h2>
+<div class="steps">
+  <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">📁 Pick your project folder</div><div class="step-desc">Click <strong>Project</strong> and select the root folder of your campaign. The plugin auto-loads optimised video files from <code>optimized-videos/</code> inside that folder.</div></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">↺ Scan the Figma page</div><div class="step-desc">Click <strong>Scan</strong>. The plugin reads the current page, finds all banner frames and sections, reads the Control Panel, and populates the UI.</div></div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">✓ Select sizes to export</div><div class="step-desc">All found sizes are checked by default. Uncheck any you don't need. Use <strong>Unselect All / Select All</strong> to toggle quickly.</div></div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">🎬 Load video files (if needed)</div><div class="step-desc">If your banners have a video layer, the <strong>Video Files</strong> panel appears after scanning. If a project folder is set, videos load automatically — buttons turn green. Otherwise pick each MP4 manually.</div></div></div>
+  <div class="step"><div class="step-num">5</div><div class="step-body"><div class="step-title">⚙ Review settings</div><div class="step-desc">Expand <strong>Settings</strong> to set the click URL, scene duration (ms), fade time (ms), vertical code and campaign date. These populate the exported filename and banner behaviour.</div></div></div>
+  <div class="step"><div class="step-num">6</div><div class="step-body"><div class="step-title">▶ Click "Convert HTML5 Banners"</div><div class="step-desc">The export overlay opens showing a progress bar and elapsed timer. Click <strong>■ Stop</strong> at any time to cancel.</div></div></div>
+  <div class="step"><div class="step-num">7</div><div class="step-body"><div class="step-title">⬇ Review the log and download</div><div class="step-desc">Read the export log for warnings (missing videos, hidden layers). When satisfied, click <strong>⬇ Download ZIP</strong>. The master ZIP contains all banners organised by funnel and copy code, plus <code>preview.html</code> pages.</div></div></div>
+</div>
+
+<h2>Video file setup</h2>
+<p>For auto-loading to work, organise your project folder like this:</p>
+<div class="callout info"><span class="callout-icon">📂</span><div class="callout-body"><strong>my-campaign/</strong><br>&nbsp;&nbsp;optimized-videos/<br>&nbsp;&nbsp;&nbsp;&nbsp;casino/<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;casino-<strong>tof</strong>-optimized.mp4<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;casino-<strong>mof</strong>-optimized.mp4<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;casino-<strong>bof</strong>-optimized.mp4</div></div>
+<p>The subfolder name must match the vertical (e.g. <code>casino</code>, <code>sports</code>). Each file must contain <code>TOF</code>, <code>MOF</code> or <code>BOF</code> anywhere in its filename (case-insensitive).</p>
+
+<h2>Output filename format</h2>
+<p>Every exported file is named using this structure:</p>
+<div class="filename">
+  <span class="fn-seg fn-brand">BA</span><span class="fn-sep">_</span>
+  <span class="fn-seg fn-year">2026</span><span class="fn-sep">_</span>
+  <span class="fn-seg fn-vertical">C</span><span class="fn-sep">_</span>
+  <span class="fn-seg fn-campaign">LNY</span><span class="fn-sep">_</span>
+  <span class="fn-seg fn-funnel">TOF</span><span class="fn-sep">_</span>
+  <span class="fn-seg fn-copy">LNY01</span><span class="fn-sep">_</span>
+  <span class="fn-seg fn-channel">DISPLAY</span><span class="fn-sep">_</span>
+  <span class="fn-seg fn-type">DYN</span><span class="fn-sep">_</span>
+  <span class="fn-seg fn-date">20260120</span><span class="fn-sep">_</span>
+  <span class="fn-seg fn-size">300x250</span>
+</div>
+<div class="table-wrap"><table>
+  <thead><tr><th>Segment</th><th>Source</th></tr></thead>
+  <tbody>
+    <tr><td>BA</td><td>Fixed — BetAnything brand prefix</td></tr>
+    <tr><td>2026</td><td>Extracted from the date field in Settings</td></tr>
+    <tr><td>C</td><td>Vertical — from Control Panel <code>vertical</code> layer or Settings</td></tr>
+    <tr><td>LNY</td><td>Campaign — from Control Panel <code>campaign</code> layer or Settings</td></tr>
+    <tr><td>TOF</td><td>Funnel — from Section name (e.g. <code>TOF_LNY01</code>)</td></tr>
+    <tr><td>LNY01</td><td>Copy code — from Section name (e.g. <code>TOF_LNY01</code>)</td></tr>
+    <tr><td>DISPLAY</td><td>Fixed — channel</td></tr>
+    <tr><td>DYN</td><td>Fixed — dynamic type</td></tr>
+    <tr><td>20260120</td><td>Date — from Settings</td></tr>
+    <tr><td>300x250</td><td>Banner size</td></tr>
+  </tbody>
+</table></div>
+
+<div class="divider"></div>
+<h2>Resources</h2>
+<div class="cta-row">
+  <a class="btn-primary" href="https://www.figma.com/design/gYRWPQdgwNdUjgHhXnNHLv/Paid-Media-Wave-4?node-id=4008-10581&t=0SCLvSRj4K0Roi5Q-1" target="_blank">✦ Open Figma Template</a>
+</div>
+</body>
+</html>
+</script>
+
 </body>
 </html>
