@@ -2,6 +2,23 @@
 
 ---
 
+## v1.6 — 2026-04-28
+
+### New
+- **Master Preview Builder** — "⊞ Master Preview" button next to Export opens a dedicated overlay with three ZIP pickers (Casino, Sports, Dual). At least one ZIP is required. The builder reads each exported ZIP, inlines all banner assets as base64 data URIs and generates a single self-contained `master-preview.html` with vertical tabs → funnel tabs → copy code pills. The file can be opened directly in any browser with no extraction or server required.
+- **Two output modes** — after export completes, two buttons appear: **⬇ Preview Bundle** (open HTML folders + `preview.html` per copy group, ready for review) and **⬇ Deliverables ZIP** (each banner size as its own `.zip`, structured for ad platform trafficking). Preview ZIP is named by campaign date; Deliverables ZIP is named by vertical (e.g. `Casino.zip`).
+- **Campaign type parsing** — section names now encode campaign type: no prefix = `Targeted`, `OR-` prefix = `Organic Retargeting`, `RR-` prefix = `Registered Retargeting` (e.g. `MOF OR-SC`, `BOF RR-500B`). Both output modes use this as the top-level folder.
+- **Structured output folders** — both Preview and Deliverables are now organised as `CampaignType / Funnel / CopyCode /` (e.g. `Targeted/TOF/WLM/` or `Organic Retargeting/MOF/SC/`).
+
+### Fixed
+- **T&Cs Apply no longer animates** — added to `STATIC_UI_PATTERNS` so it is always forced static regardless of per-frame rendering differences.
+- **TOF/MOF/BOF N layers now animate correctly** — trailing number stripped from layer name (e.g. `TOF 1`, `TOF 2` → key `TOF`) so all scene frames are grouped and cross-fade as intended.
+- **Banner count on Convert button now accurate** — previously multiplied sections × sizes (over-counting when some sections lack certain sizes); now counts only actual section/size combinations that exist in the file.
+- **Master Preview title removed** from the overlay header to save space.
+- **"CASINO & SPORTS" / "SPORTS & CASINO"** vertical labels replaced with **"Dual"** in the generated `master-preview.html`.
+
+---
+
 ## v1.5 — 2026-04-22
 
 ### New

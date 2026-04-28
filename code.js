@@ -12,7 +12,7 @@
 // with Clip Content ON. The plugin then exports the correct W×H PNG directly.
 // ─────────────────────────────────────────────────────────────────────────────
 
-figma.showUI(__html__, { width: 480, height: 870, title: 'BA Banner Generator v1.5' });
+figma.showUI(__html__, { width: 480, height: 870, title: 'BA Banner Generator v1.6' });
 
 var stopRequested = false;
 
@@ -35,7 +35,7 @@ const KNOWN_SIZES = [
 // visible and always rendered above the video layer.
 // Everything else is a scene/bg layer (hash-compared, may cross-fade).
 
-const STATIC_UI_PATTERNS = [/^cta\s*\+\s*logo/i, /^cta$/i, /^cta\s+(bof|tof|mof)$/i, /^ba_logo/i, /^logo/i];
+const STATIC_UI_PATTERNS = [/^cta\s*\+\s*logo/i, /^cta$/i, /^cta\s+(bof|tof|mof)$/i, /^ba_logo/i, /^logo/i, /^t&cs?\s/i];
 const LOGO_PATTERNS      = [/^ba_logo/i, /logo/i];
 const VIDEO_PATTERNS     = [/\.webm$/i, /video/i];
 const SCENE_PATTERNS     = [/^master/i, /master\s*\(/i];
@@ -72,29 +72,52 @@ function getStaticUiSubRole(name) {
 //      "BOF COPY 1"     → { funnel:'BOF', copyCode:'BOF-COPY-1' }  (Figma duplicate)
 //      "My Section"     → { funnel:'XX',  copyCode:'My-Section' }
 // Spaces in copyCode are replaced with hyphens for safe filenames.
-var KNOWN_FUNNELS = ['TOF', 'MOF', 'BOF'];
+var KNOWN_FUNNELS        = ['TOF', 'MOF', 'BOF'];
+var KNOWN_CAMPAIGN_TYPES = ['OR', 'RR'];
+var CAMPAIGN_TYPE_LABELS = { 'OR': 'Organic Retargeting', 'RR': 'Registered Retargeting' };
+
+// Parse "[FUNNEL] [CAMPAIGN_TYPE?]-[CopyCode]" from a Figma Section name.
+// e.g. "TOF WLM"      → { funnel:'TOF', campaignType:'Targeted', copyCode:'WLM'  }
+//      "MOF OR-SC"    → { funnel:'MOF', campaignType:'OR',       copyCode:'SC'   }
+//      "BOF RR-500B"  → { funnel:'BOF', campaignType:'RR',       copyCode:'500B' }
+//      "TOF - 500WB"  → { funnel:'TOF', campaignType:'Targeted', copyCode:'500WB'}  (legacy)
 function parseSectionName(name) {
   var trimmed = name.trim();
-  // Primary: explicit " - " separator
-  var dash = trimmed.indexOf(' - ');
-  if (dash !== -1) {
-    return {
-      funnel:   trimmed.substring(0, dash).trim().toUpperCase(),
-      copyCode: trimmed.substring(dash + 3).trim().replace(/\s+/g, '-'),
-    };
-  }
-  // Fallback: detect known funnel code at the start of the name
+  var funnel       = 'XX';
+  var campaignType = 'Targeted';
+  var rest         = trimmed;
+
+  // Extract funnel from start
   var upper = trimmed.toUpperCase();
   for (var i = 0; i < KNOWN_FUNNELS.length; i++) {
     if (upper.indexOf(KNOWN_FUNNELS[i]) === 0) {
-      var rest = trimmed.substring(KNOWN_FUNNELS[i].length).trim();
-      return {
-        funnel:   KNOWN_FUNNELS[i],
-        copyCode: (rest || trimmed).replace(/\s+/g, '-'),
-      };
+      funnel = KNOWN_FUNNELS[i];
+      rest   = trimmed.substring(KNOWN_FUNNELS[i].length).trim();
+      break;
     }
   }
-  return { funnel: 'XX', copyCode: trimmed.replace(/\s+/g, '-') };
+
+  // Legacy: explicit " - " separator → no campaign type
+  if (rest.indexOf(' - ') === 0) {
+    return { funnel: funnel, campaignType: 'Targeted', copyCode: rest.substring(3).trim().replace(/\s+/g, '-') };
+  }
+  var dashIdx = rest.indexOf(' - ');
+  if (dashIdx !== -1 && funnel === 'XX') {
+    return { funnel: rest.substring(0, dashIdx).trim().toUpperCase(), campaignType: 'Targeted', copyCode: rest.substring(dashIdx + 3).trim().replace(/\s+/g, '-') };
+  }
+
+  // New: check for campaign type prefix (e.g. "OR-SC", "RR-500B")
+  var restUpper = rest.toUpperCase();
+  for (var j = 0; j < KNOWN_CAMPAIGN_TYPES.length; j++) {
+    var ct = KNOWN_CAMPAIGN_TYPES[j];
+    if (restUpper.indexOf(ct + '-') === 0) {
+      campaignType = CAMPAIGN_TYPE_LABELS[ct] || ct;
+      rest         = rest.substring(ct.length + 1).trim();
+      break;
+    }
+  }
+
+  return { funnel: funnel, campaignType: campaignType, copyCode: rest.replace(/\s+/g, '-') || trimmed.replace(/\s+/g, '-') };
 }
 
 // ── Scan a given root node for banner frames ──────────────────────────────────
@@ -192,11 +215,12 @@ function scanSections() {
       var parsed  = parseSectionName(child.name);
       var banners = scanForBanners(child);
       sections.push({
-        id:       child.id,
-        name:     child.name,
-        funnel:   parsed.funnel,
-        copyCode: parsed.copyCode,
-        banners:  banners,
+        id:           child.id,
+        name:         child.name,
+        funnel:       parsed.funnel,
+        campaignType: parsed.campaignType,
+        copyCode:     parsed.copyCode,
+        banners:      banners,
       });
       // Accumulate into flat union
       for (var key in banners) {
@@ -624,9 +648,16 @@ async function exportSize(sizeKey, frames, settings) {
         // Group them by rounded position so all frames contribute to the same key
         // and the hash comparison in Phase 2 can detect changes → cross-fade.
         // Overlay layers use the same position-keying (fallback when no composite).
-        var key = (!item.isSubLayer && (nodeRole === 'scene' || nodeRole === 'overlay'))
-          ? nodeRole + '__' + Math.round(node.x / 5) * 5 + '_' + Math.round(node.y / 5) * 5
-          : item.key;
+        // Numbered funnel copy layers (TOF 1, TOF 2, MOF 3…) strip their trailing
+        // number so all frames share one key and animate correctly.
+        var key;
+        if (!item.isSubLayer && (nodeRole === 'scene' || nodeRole === 'overlay')) {
+          key = nodeRole + '__' + Math.round(node.x / 5) * 5 + '_' + Math.round(node.y / 5) * 5;
+        } else if (!item.isSubLayer && /^(tof|mof|bof)\s*\d+/i.test(node.name)) {
+          key = node.name.replace(/\s*\d+\s*$/, '').trim();
+        } else {
+          key = item.key;
+        }
 
         figma.ui.postMessage({
           type: 'progress',
@@ -769,19 +800,24 @@ figma.ui.onmessage = async function(msg) {
     // NEVER send nested objects-inside-arrays or arrays-inside-objects to
     // postMessage — Figma's deepUnwrap serialiser aborts on recursive nesting.
     // The UI reconstructs section objects from these parallel arrays.
-    var sectionIds        = [];
-    var sectionNames      = [];
-    var sectionFunnels    = [];
-    var sectionCopyCodes  = [];
-    var sectionSizeCounts = [];
+    var sectionIds           = [];
+    var sectionNames         = [];
+    var sectionFunnels       = [];
+    var sectionCopyCodes     = [];
+    var sectionCampaignTypes = [];
+    var sectionSizeCounts    = [];
+    var sectionSizeKeys      = [];
     if (scanResult.hasSections) {
       for (var si2 = 0; si2 < scanResult.sections.length; si2++) {
         var sec = scanResult.sections[si2];
+        var secKeys = Object.keys(sec.banners);
         sectionIds.push(String(sec.id));
         sectionNames.push(String(sec.name));
         sectionFunnels.push(String(sec.funnel));
         sectionCopyCodes.push(String(sec.copyCode));
-        sectionSizeCounts.push(Object.keys(sec.banners).length);
+        sectionCampaignTypes.push(String(sec.campaignType));
+        sectionSizeCounts.push(secKeys.length);
+        sectionSizeKeys.push(secKeys.join(','));
       }
     }
 
@@ -803,7 +839,9 @@ figma.ui.onmessage = async function(msg) {
       sectionNames:     sectionNames,
       sectionFunnels:   sectionFunnels,
       sectionCopyCodes: sectionCopyCodes,
-      sectionSizeCounts: sectionSizeCounts,
+      sectionCampaignTypes: sectionCampaignTypes,
+      sectionSizeCounts:    sectionSizeCounts,
+      sectionSizeKeys:      sectionSizeKeys,
       bannerKeys:       bannerKeys,
       bannerCounts:     bannerCounts,
       executionType:    readExecutionType() || '',
@@ -864,9 +902,10 @@ figma.ui.onmessage = async function(msg) {
           var _stopped = false;
           try {
             var resS       = await exportSize(sizeKeyS, secNode.banners[sizeKeyS], settings);
-            resS.funnel    = secNode.funnel;
-            resS.copyCode  = secNode.copyCode;
-            resS.sectionName = secNode.name;
+            resS.funnel        = secNode.funnel;
+            resS.campaignType  = secNode.campaignType;
+            resS.copyCode      = secNode.copyCode;
+            resS.sectionName   = secNode.name;
             results.push(resS);
           } catch (eS) {
             if (eS && eS.stopped) { _stopped = true; }

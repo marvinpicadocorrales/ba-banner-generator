@@ -127,9 +127,11 @@ select.nc-input{cursor:pointer}
 #overlay-log{flex:1;overflow-y:auto;padding:10px 14px;font-family:'SF Mono',Menlo,monospace;font-size:11px;line-height:1.7;background:#07071a}
 #overlay-footer{flex-shrink:0;padding:10px 14px;border-top:1px solid var(--border);display:none;align-items:center;justify-content:space-between;gap:8px;background:var(--bg-2);border-radius:0 0 8px 8px}
 #overlay-footer-info{font-size:11px;color:#666}
-#btn-overlay-download{background:var(--green);color:#111;border:none;border-radius:5px;padding:6px 18px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s}
-#btn-overlay-download:hover{opacity:.85}
-#btn-overlay-download:disabled{opacity:.4;cursor:not-allowed}
+.btn-overlay-dl{border:none;border-radius:5px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.btn-overlay-dl:hover{opacity:.85}
+.btn-overlay-dl:disabled{opacity:.4;cursor:not-allowed}
+#btn-overlay-preview{background:var(--purple-lt);color:#111}
+#btn-overlay-deliverables{background:var(--green);color:#111}
 /* ── Alerts bar ───────────────────────────────────────────────────────────── */
 #alerts{flex-shrink:0;display:none;padding:6px 14px;font-size:11px;font-weight:500;letter-spacing:.02em;border-bottom:1px solid transparent;gap:7px;align-items:center}
 #alerts.ok  {display:flex;background:#0d2318;border-color:#166534;color:var(--green)}
@@ -140,6 +142,28 @@ select.nc-input{cursor:pointer}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:2px}
+/* ── Master Preview overlay ───────────────────────────────────────────────── */
+#btn-master-preview{padding:7px 12px;border:1px solid var(--border-hi);border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:var(--purple-lt);white-space:nowrap;transition:border-color .15s,color .15s}
+#btn-master-preview:hover{border-color:var(--purple-lt);color:#a78bfa}
+#master-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(7,7,26,.85);backdrop-filter:blur(2px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+#master-overlay.active{display:flex}
+#master-card{background:var(--bg-2);border:1px solid var(--border-hi);border-radius:8px;width:100%;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+#master-hdr{flex-shrink:0;padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(160deg,#1a1242 0%,var(--bg-2) 70%);border-radius:8px 8px 0 0}
+#master-hdr-title{font-size:12px;font-weight:700;color:var(--text);letter-spacing:.02em}
+#btn-master-close{background:transparent;color:#888;border:1px solid #333;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;cursor:pointer;transition:opacity .15s}
+#btn-master-close:hover{opacity:.85}
+#master-body{padding:14px}
+.master-pick-btn{font-size:11px;color:#d4d4d4;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:4px;padding:4px 8px;cursor:pointer;text-align:left;transition:border-color .15s,color .15s,background .15s;height:28px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.master-pick-btn:hover{border-color:#666;color:#fff}
+.master-pick-btn.loaded{color:#4ade80;background:#0d2e1a;border-color:#166534}
+#btn-build-master{width:100%;padding:7px 14px;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;background:var(--purple);color:#fff;margin-bottom:10px;transition:opacity .15s}
+#btn-build-master:hover{opacity:.85}
+#btn-build-master:disabled{opacity:.4;cursor:not-allowed}
+#master-log{background:#07071a;border-radius:4px;padding:8px 10px;font-family:'SF Mono',Menlo,monospace;font-size:11px;line-height:1.7;max-height:140px;overflow-y:auto;min-height:36px}
+#master-footer{flex-shrink:0;padding:10px 14px;border-top:1px solid var(--border);display:none;align-items:center;justify-content:space-between;gap:8px;background:var(--bg-2);border-radius:0 0 8px 8px}
+#master-footer-info{font-size:11px;color:#666}
+#btn-master-download{background:var(--green);color:#111;border:none;border-radius:5px;padding:6px 18px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s}
+#btn-master-download:hover{opacity:.85}
 </style>
 </head>
 <body>
@@ -174,7 +198,7 @@ select.nc-input{cursor:pointer}
       </g>
     </svg>
   </div>
-  <span class="hdr-ver">v1.5</span>
+  <span class="hdr-ver">v1.6</span>
   </div>
   <div style="display:flex;gap:6px;align-items:center">
     <button id="btn-pick-folder" title="Pick project folder for auto video loading">📁 Project</button>
@@ -286,6 +310,7 @@ select.nc-input{cursor:pointer}
 
 <div id="btn-row">
   <button id="btn-export" disabled>Convert HTML5 Banners</button>
+  <button id="btn-master-preview" title="Merge multiple vertical ZIPs into one master preview">⊞ Master Preview</button>
 </div>
 <div id="progress-bar-wrap"><div id="progress-bar"></div><span id="progress-pct"></span></div>
 <div id="downloads">
@@ -318,7 +343,30 @@ select.nc-input{cursor:pointer}
     <div id="overlay-log"></div>
     <div id="overlay-footer">
       <span id="overlay-footer-info"></span>
-      <button id="btn-overlay-download" disabled>⬇ Download ZIP</button>
+      <div style="display:flex;gap:6px">
+        <button id="btn-overlay-preview" class="btn-overlay-dl" disabled>⬇ Preview Bundle</button>
+        <button id="btn-overlay-deliverables" class="btn-overlay-dl" disabled>⬇ Deliverables ZIP</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="master-overlay">
+  <div id="master-card">
+    <div id="master-hdr">
+      <button id="btn-master-close">✕ Close</button>
+    </div>
+    <div id="master-body">
+      <p style="font-size:11px;color:var(--text-2);margin-bottom:10px">Point to the folder containing your exported vertical ZIPs. The plugin auto-detects any <code style="font-size:10px;background:var(--bg-3);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--green)">*_ALL_BANNERS.zip</code> files and reads the vertical from the filename.</p>
+      <input type="file" id="master-folder-input" webkitdirectory style="display:none">
+      <button type="button" id="btn-master-pick-folder" class="master-pick-btn" style="width:100%;margin-bottom:10px">📁 Choose folder…</button>
+      <div id="master-detected" style="display:none;background:#07071a;border-radius:4px;padding:6px 10px;margin-bottom:10px"></div>
+      <button id="btn-build-master" disabled>Build Master Preview</button>
+      <div id="master-log"></div>
+    </div>
+    <div id="master-footer">
+      <span id="master-footer-info"></span>
+      <button id="btn-master-download" disabled>⬇ Download master-preview.html</button>
     </div>
   </div>
 </div>
@@ -329,8 +377,6 @@ var allExportedBlobs      = []; // { filename, blob } — accumulates across exp
 var workingFolderHandle   = null; // FileSystemDirectoryHandle — persists for the session
 var allBannerData         = []; // { result, settings, overrides } — for structured master ZIP
 var currentSections       = []; // full section objects from last scan
-var pendingMasterBlob     = null; // master ZIP blob waiting for user to click Download
-var pendingMasterName     = '';
 var exportTotal           = 0;   // total banners code.js will process (for accurate progress)
 var exportDone            = 0;   // banners processed so far in code.js
 var lastExportHadSections = false;
@@ -403,21 +449,34 @@ function resetOverlay() {
   document.getElementById('overlay-pct-hdr').textContent = '0%';
   document.getElementById('overlay-close').style.display     = 'none';
   document.getElementById('btn-stop-export').style.display   = 'none';
-  document.getElementById('overlay-footer').style.display    = 'none';
-  document.getElementById('btn-overlay-download').disabled   = true;
-  document.getElementById('btn-overlay-download').textContent = '⬇ Download ZIP';
+  document.getElementById('overlay-footer').style.display = 'none';
+  document.getElementById('btn-overlay-preview').disabled = true;
+  document.getElementById('btn-overlay-preview').textContent = '⬇ Preview Bundle';
+  document.getElementById('btn-overlay-deliverables').disabled = true;
+  document.getElementById('btn-overlay-deliverables').textContent = '⬇ Deliverables ZIP';
   document.getElementById('overlay-log').innerHTML = '';
 }
 
 function updateExportBtn() {
-  var btn          = document.getElementById('btn-export');
-  var checkedSizes = document.querySelectorAll('#sizes-list input:checked').length;
-  var total        = 0;
+  var btn             = document.getElementById('btn-export');
+  var checkedSizeEls  = document.querySelectorAll('#sizes-list input:checked');
+  var checkedSizeKeys = Array.from(checkedSizeEls).map(function(el) { return el.value; });
+  var total           = 0;
   if (currentSections.length > 0) {
-    var checkedSections = document.querySelectorAll('#sections-list input:checked').length;
-    total = checkedSections * checkedSizes;
+    var checkedSecEls = document.querySelectorAll('#sections-list input:checked');
+    for (var i = 0; i < checkedSecEls.length; i++) {
+      var sec = currentSections[Number(checkedSecEls[i].value)];
+      if (!sec) continue;
+      if (sec.sizes && sec.sizes.length) {
+        for (var j = 0; j < checkedSizeKeys.length; j++) {
+          if (sec.sizes.indexOf(checkedSizeKeys[j]) !== -1) total++;
+        }
+      } else {
+        total += checkedSizeKeys.length;
+      }
+    }
   } else {
-    total = checkedSizes;
+    total = checkedSizeKeys.length;
   }
   btn.textContent = 'Convert ' + (total || '') + (total ? ' ' : '') + 'HTML5 Banners';
   btn.disabled    = total === 0;
@@ -442,7 +501,7 @@ function getSettings() {
 
 // ── Build the canonical file/folder name for a given banner size ──────────────
 function verticalLabel(code) {
-  var map = { 'C':'Casino', 'S':'Sports', 'D':'Dual', 'CS':'Casino & Sports', 'SC':'Sports & Casino' };
+  var map = { 'C':'Casino', 'S':'Sports', 'D':'Dual', 'CS':'Dual', 'SC':'Dual' };
   return map[(code || '').toUpperCase()] || code || 'Display';
 }
 
@@ -705,20 +764,24 @@ function renderScanResult(msg) {
     banners[bKeys[bi]] = { frameCount: bCounts[bi] };
   }
 
-  // Rebuild sections array: [{ id, name, funnel, copyCode, sizeCount }]
-  var sections = [];
-  var sIds     = msg.sectionIds        || [];
-  var sNames   = msg.sectionNames      || [];
-  var sFuns    = msg.sectionFunnels    || [];
-  var sCodes   = msg.sectionCopyCodes  || [];
-  var sCounts  = msg.sectionSizeCounts || [];
+  // Rebuild sections array: [{ id, name, funnel, campaignType, copyCode, sizeCount, sizes }]
+  var sections  = [];
+  var sIds      = msg.sectionIds           || [];
+  var sNames    = msg.sectionNames         || [];
+  var sFuns     = msg.sectionFunnels       || [];
+  var sCodes    = msg.sectionCopyCodes     || [];
+  var sCTypes   = msg.sectionCampaignTypes || [];
+  var sCounts   = msg.sectionSizeCounts    || [];
+  var sSizeKeys = msg.sectionSizeKeys      || [];
   for (var si = 0; si < sIds.length; si++) {
     sections.push({
-      id:        sIds[si],
-      name:      sNames[si],
-      funnel:    sFuns[si],
-      copyCode:  sCodes[si],
-      sizeCount: sCounts[si],
+      id:           sIds[si],
+      name:         sNames[si],
+      funnel:       sFuns[si],
+      campaignType: sCTypes[si] || 'Targeted',
+      copyCode:     sCodes[si],
+      sizeCount:    sCounts[si],
+      sizes:        sSizeKeys[si] ? sSizeKeys[si].split(',') : [],
     });
   }
 
@@ -903,6 +966,7 @@ function autoLoadVideos(executionType) {
 }
 
 document.getElementById('btn-scan').addEventListener('click', scan);
+
 
 document.getElementById('btn-export').addEventListener('click', function() {
   if (isExporting) return;
@@ -1404,8 +1468,9 @@ async function handleExportComplete(results, settings, errors) {
     var result = results[ri];
     // Per-result overrides from section export
     var overrides = (result.funnel || result.copyCode) ? {
-      funnel:   result.funnel   || null,
-      copyCode: result.copyCode || null,
+      funnel:       result.funnel       || null,
+      campaignType: result.campaignType || 'Targeted',
+      copyCode:     result.copyCode     || null,
     } : null;
 
     try {
@@ -1461,28 +1526,12 @@ async function handleExportComplete(results, settings, errors) {
   document.getElementById('btn-stop-export').style.display = 'none';
   document.getElementById('overlay-close').style.display   = 'block';
 
-  // Build master ZIP and arm the Download button — user decides when to save
+  // Arm both download buttons — ZIP is built on click
   if (done > 0) {
-    try {
-      log('\nPackaging master ZIP…', 'info');
-      var s = getSettings();
-      var year = (s.ncDate || '').substring(0, 4) || 'YYYY';
-      var masterParts = ['BA', year];
-      if (s.ncVertical) masterParts.push(s.ncVertical);
-      masterParts.push(s.ncCampaign, s.ncDate, 'ALL_BANNERS');
-      pendingMasterName = masterParts.join('_') + '.zip';
-      pendingMasterBlob = await buildStructuredMasterZip();
-      log('✓ Master ZIP ready — ' + formatSize(pendingMasterBlob.size) + '. Click Download when ready.', 'ok');
-
-      var dlBtn  = document.getElementById('btn-overlay-download');
-      var footer = document.getElementById('overlay-footer');
-      var info   = document.getElementById('overlay-footer-info');
-      info.textContent = pendingMasterName + '  ·  ' + formatSize(pendingMasterBlob.size);
-      dlBtn.disabled = false;
-      footer.style.display = 'flex';
-    } catch(ze) {
-      log('⚠ Could not build master ZIP: ' + ze.message, 'warn');
-    }
+    document.getElementById('overlay-footer-info').textContent = done + ' banner(s) ready';
+    document.getElementById('btn-overlay-preview').disabled = false;
+    document.getElementById('btn-overlay-deliverables').disabled = false;
+    document.getElementById('overlay-footer').style.display = 'flex';
   }
 }
 
@@ -1523,48 +1572,167 @@ document.getElementById('btn-stop-export').addEventListener('click', function() 
 document.getElementById('overlay-close').addEventListener('click', function() {
   document.getElementById('export-overlay').classList.remove('active');
   document.getElementById('overlay-footer').style.display = 'none';
-  document.getElementById('btn-overlay-download').disabled = true;
+  document.getElementById('btn-overlay-preview').disabled = true;
+  document.getElementById('btn-overlay-deliverables').disabled = true;
 });
 
-// ── Overlay download button ───────────────────────────────────────────────────
-document.getElementById('btn-overlay-download').addEventListener('click', function() {
-  if (!pendingMasterBlob) return;
-  var url = URL.createObjectURL(pendingMasterBlob);
-  var a = document.createElement('a');
-  a.href = url; a.download = pendingMasterName; a.click();
-  URL.revokeObjectURL(url);
-  pendingMasterBlob = null;
-  pendingMasterName = '';
-  var btn = document.getElementById('btn-overlay-download');
-  btn.textContent = '✓ Downloaded';
+// ── Preview Bundle button ─────────────────────────────────────────────────────
+document.getElementById('btn-overlay-preview').addEventListener('click', async function() {
+  var btn = this;
   btn.disabled = true;
+  btn.textContent = 'Building…';
+  try {
+    var s    = getSettings();
+    var year = (s.ncDate || '').substring(0, 4) || 'YYYY';
+    var name = ['BA', year, s.ncVertical, s.ncCampaign, s.ncDate, 'PREVIEW'].join('_') + '.zip';
+    var blob = await buildStructuredMasterZip();
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    URL.revokeObjectURL(url);
+    btn.textContent = '✓ Downloaded';
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '⬇ Preview Bundle';
+    log('⚠ Preview bundle failed: ' + e.message, 'err');
+  }
 });
+
+// ── Deliverables button ───────────────────────────────────────────────────────
+document.getElementById('btn-overlay-deliverables').addEventListener('click', async function() {
+  var btn = this;
+  btn.disabled = true;
+  btn.textContent = 'Building…';
+  try {
+    var s    = getSettings();
+    var year = (s.ncDate || '').substring(0, 4) || 'YYYY';
+    var name = (verticalLabel(s.ncVertical) || 'Banners') + '.zip';
+    var blob = await buildDeliverablesZip();
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    URL.revokeObjectURL(url);
+    btn.textContent = '✓ Downloaded';
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '⬇ Deliverables ZIP';
+    log('⚠ Deliverables ZIP failed: ' + e.message, 'err');
+  }
+});
+
+// ── FSA helpers ───────────────────────────────────────────────────────────────
+// FsaCollector mimics the JSZip folder API (.folder / .file) so addBannerToFolder
+// can write to the File System Access API without modification.
+function FsaCollector(prefix, rootItems) {
+  this._prefix    = prefix    || '';
+  this._rootItems = rootItems || []; // shared array across all child collectors
+}
+FsaCollector.prototype.folder = function(name) {
+  var newPrefix = this._prefix ? this._prefix + '/' + name : name;
+  return new FsaCollector(newPrefix, this._rootItems);
+};
+FsaCollector.prototype.file = function(path, content, opts) {
+  var fullPath = this._prefix ? this._prefix + '/' + path : path;
+  this._rootItems.push({ path: fullPath, content: content, isBase64: !!(opts && opts.base64) });
+};
+FsaCollector.prototype.flushToDir = async function(dirHandle) {
+  for (var i = 0; i < this._rootItems.length; i++) {
+    await fsaWriteItem(dirHandle, this._rootItems[i]);
+  }
+};
+
+async function fsaWriteItem(rootHandle, item) {
+  var parts = item.path.split('/');
+  var dir   = rootHandle;
+  for (var i = 0; i < parts.length - 1; i++) {
+    dir = await dir.getDirectoryHandle(parts[i], { create: true });
+  }
+  var fh = await dir.getFileHandle(parts[parts.length - 1], { create: true });
+  var w  = await fh.createWritable();
+  if (item.isBase64) {
+    var bin   = atob(item.content);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    await w.write(bytes.buffer);
+  } else {
+    await w.write(item.content);
+  }
+  await w.close();
+}
+
+// ── Shared group builder (campaignType / funnel / copyCode) ───────────────────
+function buildGroups() {
+  var groups = {};
+  for (var i = 0; i < allBannerData.length; i++) {
+    var bd  = allBannerData[i];
+    var f   = (bd.overrides && bd.overrides.funnel)       ? bd.overrides.funnel                        : 'XX';
+    var ct  = (bd.overrides && bd.overrides.campaignType) ? bd.overrides.campaignType                  : 'Targeted';
+    var c   = (bd.overrides && bd.overrides.copyCode)     ? bd.overrides.copyCode.replace(/\s+/g, '-') : 'XX';
+    var key = ct + '|' + f + '|' + c;
+    if (!groups[key]) groups[key] = { campaignType: ct, funnel: f, copyCode: c, items: [] };
+    groups[key].items.push(bd);
+  }
+  return groups;
+}
+
+// ── Preview Bundle → write open folders to FSA directory ─────────────────────
+// Structure: campaignType/funnel/copyCode/bannerName/ (html + assets) + preview.html
+async function buildPreviewToFolder(dirHandle) {
+  var groups = buildGroups();
+  var keys   = Object.keys(groups);
+  for (var gi = 0; gi < keys.length; gi++) {
+    var grp       = groups[keys[gi]];
+    var prefix    = grp.campaignType + '/' + grp.funnel + '/' + grp.copyCode;
+    var collector = new FsaCollector(prefix);
+    var previews  = [];
+    for (var bi = 0; bi < grp.items.length; bi++) {
+      var bd    = grp.items[bi];
+      var cName = await addBannerToFolder(collector, bd.result, bd.settings, bd.overrides);
+      previews.push({ canonicalName: cName, sizeKey: bd.result.sizeKey });
+    }
+    var vl = grp.items.length ? verticalLabel(grp.items[0].settings.ncVertical) : 'Display';
+    collector.file('preview.html', generatePreviewHTML(grp.funnel, grp.copyCode, previews, vl));
+    await collector.flushToDir(dirHandle);
+  }
+}
+
+// ── Deliverables → write size.zip files to FSA directory ─────────────────────
+// Structure: campaignType/funnel/copyCode/bannerName.zip
+async function buildDeliveriablesToFolder(dirHandle) {
+  var groups = buildGroups();
+  var keys   = Object.keys(groups);
+  for (var gi = 0; gi < keys.length; gi++) {
+    var grp     = groups[keys[gi]];
+    var ctDir   = await dirHandle.getDirectoryHandle(grp.campaignType, { create: true });
+    var fnDir   = await ctDir.getDirectoryHandle(grp.funnel,           { create: true });
+    var codeDir = await fnDir.getDirectoryHandle(grp.copyCode,         { create: true });
+    for (var bi = 0; bi < grp.items.length; bi++) {
+      var bd    = grp.items[bi];
+      var blob  = await buildZip(bd.result, bd.settings, bd.overrides);
+      var cName = buildCanonicalName(bd.settings, bd.result.sizeKey, bd.overrides);
+      var fh    = await codeDir.getFileHandle(cName + '.zip', { create: true });
+      var w     = await fh.createWritable();
+      await w.write(blob);
+      await w.close();
+    }
+  }
+}
 
 // ── Structured master ZIP builder ─────────────────────────────────────────────
 // Produces: FUNNEL/COPYCODE/BANNERNAME/… + FUNNEL/COPYCODE/preview.html
 async function buildStructuredMasterZip() {
-  var master = new JSZip();
-  var groups = {}; // 'FUNNEL|CODE' → { funnel, copyCode, items[] }
-
-  for (var i = 0; i < allBannerData.length; i++) {
-    var bd  = allBannerData[i];
-    var f   = (bd.overrides && bd.overrides.funnel)   ? bd.overrides.funnel                         : 'XX';
-    var c   = (bd.overrides && bd.overrides.copyCode) ? bd.overrides.copyCode.replace(/\s+/g, '-') : 'XX';
-    var key = f + '|' + c;
-    if (!groups[key]) groups[key] = { funnel: f, copyCode: c, items: [] };
-    groups[key].items.push(bd);
-  }
-
+  var master           = new JSZip();
+  var groups           = buildGroups();
   var keys             = Object.keys(groups);
-  var allGroupsPreview = []; // collected for root preview.html
+  var allGroupsPreview = [];
 
   for (var gi = 0; gi < keys.length; gi++) {
     var grp        = groups[keys[gi]];
-    var copyFolder = master.folder(grp.funnel).folder(grp.copyCode);
+    var copyFolder = master.folder(grp.campaignType).folder(grp.funnel).folder(grp.copyCode);
     var previews   = [];
 
     for (var bi = 0; bi < grp.items.length; bi++) {
-      var bd = grp.items[bi];
+      var bd    = grp.items[bi];
       var cName = await addBannerToFolder(copyFolder, bd.result, bd.settings, bd.overrides);
       previews.push({ canonicalName: cName, sizeKey: bd.result.sizeKey });
     }
@@ -1576,6 +1744,28 @@ async function buildStructuredMasterZip() {
 
   var _rootVL = allGroupsPreview.length ? (allGroupsPreview[0].vertLabel || 'Display') : 'Display';
   master.file('preview.html', generateRootPreviewHTML(allGroupsPreview, _rootVL));
+
+  return await master.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+}
+
+// ── Deliverables ZIP builder ──────────────────────────────────────────────────
+// Produces: CAMPAIGNTYPE/FUNNEL/COPYCODE/BANNERNAME.zip
+async function buildDeliverablesZip() {
+  var master = new JSZip();
+  var groups = buildGroups();
+  var keys   = Object.keys(groups);
+
+  for (var gi = 0; gi < keys.length; gi++) {
+    var grp        = groups[keys[gi]];
+    var copyFolder = master.folder(grp.campaignType).folder(grp.funnel).folder(grp.copyCode);
+
+    for (var bi = 0; bi < grp.items.length; bi++) {
+      var bd    = grp.items[bi];
+      var blob  = await buildZip(bd.result, bd.settings, bd.overrides);
+      var cName = buildCanonicalName(bd.settings, bd.result.sizeKey, bd.overrides);
+      copyFolder.file(cName + '.zip', await blob.arrayBuffer());
+    }
+  }
 
   return await master.generateAsync({ type: 'blob', compression: 'DEFLATE' });
 }
@@ -1785,6 +1975,355 @@ document.getElementById('btn-help').addEventListener('click', function() {
 document.getElementById('btn-help-close').addEventListener('click', function() {
   document.getElementById('help-overlay').classList.remove('active');
 });
+
+// ── Master Preview Builder ────────────────────────────────────────────────────
+var masterZipFiles = []; // [{ verticalName, verticalCode, file }]
+
+document.getElementById('btn-master-preview').addEventListener('click', function() {
+  // Reset build state each time the overlay opens
+  document.getElementById('master-log').innerHTML = '';
+  document.getElementById('master-footer').style.display = 'none';
+  document.getElementById('btn-master-download').disabled = true;
+  var buildBtn = document.getElementById('btn-build-master');
+  buildBtn.textContent = 'Build Master Preview';
+  buildBtn.disabled = !masterZipFiles.length;
+  document.getElementById('master-overlay').classList.add('active');
+});
+document.getElementById('btn-master-close').addEventListener('click', function() {
+  document.getElementById('master-overlay').classList.remove('active');
+});
+document.getElementById('btn-build-master').addEventListener('click', function() {
+  buildMasterPreview();
+});
+
+document.getElementById('btn-master-pick-folder').addEventListener('click', function() {
+  document.getElementById('master-folder-input').click();
+});
+
+document.getElementById('master-folder-input').addEventListener('change', function(e) {
+  var files    = e.target.files;
+  var pickBtn  = document.getElementById('btn-master-pick-folder');
+  var detected = document.getElementById('master-detected');
+  var buildBtn = document.getElementById('btn-build-master');
+  masterZipFiles = [];
+
+  if (!files || !files.length) {
+    pickBtn.textContent = '📁 Choose folder…';
+    pickBtn.classList.remove('loaded');
+    detected.style.display = 'none';
+    buildBtn.disabled = true;
+    return;
+  }
+
+  var folderName = '';
+  // Preferred vertical order for display
+  var VERT_ORDER = ['C','S','CS','SC','D'];
+
+  for (var i = 0; i < files.length; i++) {
+    var f   = files[i];
+    var rel = f.webkitRelativePath || f.name;
+    var segs = rel.split('/');
+    if (!folderName) folderName = segs[0];
+    // Only root-level files (depth = 2: FolderName/file.zip)
+    if (segs.length !== 2) continue;
+    var fname = segs[1];
+    if (!/\.zip$/i.test(fname)) continue;
+    if (!/ALL_BANNERS/i.test(fname)) continue;
+
+    // Filename pattern: BA_YYYY_VERTICAL_CAMPAIGN_DATE_ALL_BANNERS.zip
+    var nameParts = fname.replace(/\.zip$/i, '').split('_');
+    var vertCode  = nameParts.length >= 3 ? nameParts[2].toUpperCase() : '';
+    var vertName  = verticalLabel(vertCode) || vertCode;
+    masterZipFiles.push({ verticalName: vertName, verticalCode: vertCode, file: f });
+  }
+
+  // Sort by preferred vertical order
+  masterZipFiles.sort(function(a, b) {
+    var ai = VERT_ORDER.indexOf(a.verticalCode); if (ai === -1) ai = 99;
+    var bi = VERT_ORDER.indexOf(b.verticalCode); if (bi === -1) bi = 99;
+    return ai - bi;
+  });
+
+  if (masterZipFiles.length) {
+    pickBtn.textContent = '✓ ' + folderName + '  (' + masterZipFiles.length + ' ZIP' + (masterZipFiles.length > 1 ? 's' : '') + ' detected)';
+    pickBtn.classList.add('loaded');
+    detected.style.display = 'block';
+    detected.innerHTML = masterZipFiles.map(function(z) {
+      return '<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px">' +
+        '<span style="color:#4ade80;flex-shrink:0">✓</span>' +
+        '<span style="color:#a78bfa;font-weight:700;min-width:34px;flex-shrink:0">' + z.verticalCode + '</span>' +
+        '<span style="color:#888;flex-shrink:0">' + z.verticalName + '</span>' +
+        '<span style="color:#333;margin-left:auto;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + z.file.name + '</span>' +
+        '</div>';
+    }).join('');
+    buildBtn.disabled = false;
+  } else {
+    pickBtn.textContent = '⚠ No ALL_BANNERS.zip files found in this folder';
+    pickBtn.classList.remove('loaded');
+    detected.style.display = 'none';
+    buildBtn.disabled = true;
+  }
+});
+
+// Inline asset src/poster references in banner HTML using ZIP file contents
+async function inlineZipAssets(html, zip, assetBasePath) {
+  var mimeMap = { png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp', gif:'image/gif', mp4:'video/mp4', webm:'video/webm' };
+  // Collect unique filenames needed
+  var needed = {};
+  var regex  = /(src|poster)="assets\/([^"]+)"/g;
+  var m;
+  while ((m = regex.exec(html)) !== null) { needed[m[2]] = true; }
+  // Resolve each to a data URI
+  var resolved = {};
+  var names = Object.keys(needed);
+  for (var i = 0; i < names.length; i++) {
+    var fname   = names[i];
+    var zipPath = assetBasePath + fname;
+    var zf      = zip.files[zipPath];
+    if (!zf) continue;
+    var ext  = fname.split('.').pop().toLowerCase();
+    var mime = mimeMap[ext] || 'application/octet-stream';
+    var b64  = await zf.async('base64');
+    resolved[fname] = 'data:' + mime + ';base64,' + b64;
+  }
+  // Replace references
+  return html.replace(/(src|poster)="assets\/([^"]+)"/g, function(match, attr, fname) {
+    return resolved[fname] ? (attr + '="' + resolved[fname] + '"') : match;
+  });
+}
+
+// Generate the combined master-preview.html
+function generateMasterPreviewHTML_multi(verticals) {
+  var ORDER       = ['300x600','160x600','320x480','300x250','320x50','300x50','728x90'];
+  var STACKED     = ['300x250','320x50','300x50'];
+  var RIGHT_BLOCK = ['320x480','300x250','320x50','300x50','728x90'];
+
+  function bannerItemSrcdoc(sizeKey, bannerHtml) {
+    var parts = sizeKey.split('x');
+    var w = parseInt(parts[0], 10) || 300;
+    var h = parseInt(parts[1], 10) || 250;
+    // Encode for srcdoc attribute: & → &amp;  " → &quot;
+    var encoded = bannerHtml.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    return '<div class="banner-item">' +
+      '<div class="banner-label">' + sizeKey + '</div>' +
+      '<iframe srcdoc="' + encoded + '" width="' + w + '" height="' + h + '" scrolling="no" frameborder="0"></iframe>' +
+      '</div>';
+  }
+
+  function layoutBanners(banners) {
+    banners = banners.slice().sort(function(a, b) {
+      var ai = ORDER.indexOf(a.sizeKey); if (ai === -1) ai = 999;
+      var bi = ORDER.indexOf(b.sizeKey); if (bi === -1) bi = 999;
+      return ai - bi;
+    });
+    var left = [], rtMain = [], rtStack = [], rtBot = [];
+    banners.forEach(function(b) {
+      if (b.sizeKey === '728x90')                     rtBot.push(b);
+      else if (STACKED.indexOf(b.sizeKey) !== -1)     rtStack.push(b);
+      else if (RIGHT_BLOCK.indexOf(b.sizeKey) !== -1) rtMain.push(b);
+      else                                             left.push(b);
+    });
+    var lH  = left.map(function(b) { return bannerItemSrcdoc(b.sizeKey, b.bannerHtml); }).join('');
+    var rtH = rtMain.map(function(b) { return bannerItemSrcdoc(b.sizeKey, b.bannerHtml); }).join('');
+    var rsH = rtStack.length
+      ? '<div class="banner-stack">' + rtStack.map(function(b) { return bannerItemSrcdoc(b.sizeKey, b.bannerHtml); }).join('') + '</div>'
+      : '';
+    var rbH = rtBot.map(function(b) { return bannerItemSrcdoc(b.sizeKey, b.bannerHtml); }).join('');
+    var rcH = (rtH || rsH || rbH)
+      ? '<div class="right-col">' +
+        ((rtH || rsH) ? '<div class="right-row">' + rtH + rsH + '</div>' : '') +
+        (rbH ? '<div class="right-bot">' + rbH + '</div>' : '') +
+        '</div>'
+      : '';
+    return '<div class="banners">' + lH + rcH + '</div>';
+  }
+
+  // Build DATA: vertical → funnel → copyCode → HTML string
+  var dataLines = verticals.map(function(v) {
+    var fLines = Object.keys(v.groups).map(function(f) {
+      var cLines = Object.keys(v.groups[f]).map(function(c) {
+        return JSON.stringify(c) + ':' + JSON.stringify(layoutBanners(v.groups[f][c]));
+      });
+      return JSON.stringify(f) + ':{' + cLines.join(',') + '}';
+    });
+    return JSON.stringify(v.name) + ':{' + fLines.join(',') + '}';
+  });
+  var dataJS = 'var DATA={' + dataLines.join(',') + '};';
+
+  var firstV      = verticals[0];
+  var firstVName  = firstV ? firstV.name : '';
+  var firstFunnel = firstV ? Object.keys(firstV.groups)[0] : '';
+  var firstCode   = (firstFunnel && firstV) ? Object.keys(firstV.groups[firstFunnel])[0] : '';
+  var firstContent = (firstFunnel && firstCode) ? layoutBanners(firstV.groups[firstFunnel][firstCode]) : '';
+
+  var vtabsHTML = verticals.map(function(v) {
+    return '<button class="vtab' + (v.name === firstVName ? ' active' : '') + '" onclick="selV(\'' + v.name + '\')">' + v.name + '</button>';
+  }).join('');
+  var ftabsHTML = firstV ? Object.keys(firstV.groups).map(function(f) {
+    return '<button class="tab' + (f === firstFunnel ? ' active' : '') + '" onclick="selF(\'' + f + '\')">' + f + '</button>';
+  }).join('') : '';
+  var pillsHTML = firstFunnel ? Object.keys(firstV.groups[firstFunnel]).map(function(c, i) {
+    return '<button class="pill' + (i === 0 ? ' active' : '') + '" onclick="selC(\'' + c + '\')">' + c + '</button>';
+  }).join('') : '';
+
+  var css =
+    '*{box-sizing:border-box;margin:0;padding:0}' +
+    'body{background:#111;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#fff;padding:40px;min-height:100vh}' +
+    '.header{margin-bottom:28px}' +
+    '.header-title{font-size:22px;font-weight:700;letter-spacing:3px;text-transform:uppercase}' +
+    '.vtabs{display:flex;gap:6px;margin-bottom:28px}' +
+    '.vtab{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:6px;padding:8px 24px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6677aa;cursor:pointer;transition:all .15s}' +
+    '.vtab:hover{border-color:#6d28d9;color:#a78bfa}' +
+    '.vtab.active{background:#6d28d9;border-color:#7c3aed;color:#fff}' +
+    '.tabs{display:flex;gap:2px;border-bottom:1px solid #222;margin-bottom:24px}' +
+    '.tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 20px 10px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#444;cursor:pointer;margin-bottom:-1px;transition:color .15s}' +
+    '.tab:hover{color:#aaa}.tab.active{color:#fff;border-bottom-color:#fff}' +
+    '.pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:36px}' +
+    '.pill{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:20px;padding:5px 16px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#555;cursor:pointer;transition:all .15s}' +
+    '.pill:hover{border-color:#444;color:#ccc}.pill.active{background:#fff;border-color:#fff;color:#111}' +
+    '.banners{display:flex;flex-wrap:nowrap;gap:24px;align-items:flex-start;margin-bottom:24px}' +
+    '.right-col{display:flex;flex-direction:column;gap:8px}' +
+    '.right-row{display:flex;flex-wrap:nowrap;gap:24px;align-items:flex-start}' +
+    '.right-bot{display:flex}' +
+    '.banner-stack{display:flex;flex-direction:column;gap:16px}' +
+    '.banner-item{display:flex;flex-direction:column;align-items:flex-start;gap:8px}' +
+    '.banner-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#555}' +
+    'iframe{display:block;border:1px solid #222}';
+
+  var js = dataJS + '\n' +
+    'var _v=' + JSON.stringify(firstVName) + ',_f=' + JSON.stringify(firstFunnel) + ';\n' +
+    'function selV(v){\n' +
+    '  _v=v;_f=Object.keys(DATA[v])[0];\n' +
+    '  document.querySelectorAll(".vtab").forEach(function(t){t.classList.toggle("active",t.textContent===v);});\n' +
+    '  var fk=Object.keys(DATA[v]);\n' +
+    '  document.getElementById("ft").innerHTML=fk.map(function(f){return \'<button class="tab\'+(f===_f?\' active\':\'\')+\'" onclick="selF(\\\'\'+f+\'\\\')">\'+ f +\'</button>\';}).join("");\n' +
+    '  var ck=Object.keys(DATA[v][_f]);\n' +
+    '  document.getElementById("pl").innerHTML=ck.map(function(c,i){return \'<button class="pill\'+(i===0?\' active\':\'\')+\'" onclick="selC(\\\'\'+c+\'\\\')">\'+ c +\'</button>\';}).join("");\n' +
+    '  document.getElementById("ct").innerHTML=DATA[v][_f][ck[0]];\n' +
+    '}\n' +
+    'function selF(f){\n' +
+    '  _f=f;\n' +
+    '  document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("active",t.textContent===f);});\n' +
+    '  var ck=Object.keys(DATA[_v][f]);\n' +
+    '  document.getElementById("pl").innerHTML=ck.map(function(c,i){return \'<button class="pill\'+(i===0?\' active\':\'\')+\'" onclick="selC(\\\'\'+c+\'\\\')">\'+ c +\'</button>\';}).join("");\n' +
+    '  document.getElementById("ct").innerHTML=DATA[_v][f][ck[0]];\n' +
+    '}\n' +
+    'function selC(c){\n' +
+    '  document.querySelectorAll(".pill").forEach(function(p){p.classList.toggle("active",p.textContent.trim()===c);});\n' +
+    '  document.getElementById("ct").innerHTML=DATA[_v][_f][c];\n' +
+    '}';
+
+  // Prevent the HTML parser from closing the outer script tag mid-way through
+  // the DATA object. Replace </ + script with <\/ + script (valid JS, safe HTML).
+  var safeJs = js.replace(/<\/script/gi, '<\\/script');
+
+  return '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="utf-8">\n' +
+    '<title>Master Preview</title>\n' +
+    '<style>\n' + css + '\n</style>\n' +
+    '</head>\n<body>\n' +
+    '<div class="vtabs">' + vtabsHTML + '</div>\n' +
+    '<div class="tabs" id="ft">' + ftabsHTML + '</div>\n' +
+    '<div class="pills" id="pl">' + pillsHTML + '</div>\n' +
+    '<div id="ct">' + firstContent + '</div>\n' +
+    '<script>\n' + safeJs + '\n<\/script>\n' +
+    '</body>\n</html>';
+}
+
+// Build the master preview from selected ZIPs
+async function buildMasterPreview() {
+  var buildBtn = document.getElementById('btn-build-master');
+  var logEl    = document.getElementById('master-log');
+  var dlBtn    = document.getElementById('btn-master-download');
+  var footer   = document.getElementById('master-footer');
+  var infoEl   = document.getElementById('master-footer-info');
+
+  buildBtn.disabled = true;
+  buildBtn.textContent = 'Building…';
+  footer.style.display = 'none';
+  dlBtn.disabled = true;
+  logEl.innerHTML = '';
+
+  function mlog(msg, type) {
+    var div = document.createElement('div');
+    div.className = 'log-' + (type || 'info');
+    div.textContent = msg;
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  try {
+    var verticals = [];
+
+    for (var vi = 0; vi < masterZipFiles.length; vi++) {
+      var vName = masterZipFiles[vi].verticalName;
+      var vFile = masterZipFiles[vi].file;
+
+      mlog('Reading ' + vName + ' ZIP…', 'info');
+      var zip    = await JSZip.loadAsync(vFile);
+      var groups = {}; // funnel → copyCode → [{sizeKey, bannerHtml}]
+      var bannerCount = 0;
+
+      var paths = Object.keys(zip.files);
+      for (var pi = 0; pi < paths.length; pi++) {
+        var path = paths[pi];
+        if (zip.files[path].dir) continue;
+        // Match: FUNNEL/COPYCODE/BANNERDIR/BANNERDIR.html  (exactly 4 parts)
+        var parts = path.split('/');
+        if (parts.length !== 4) continue;
+        if (!parts[3].endsWith('.html')) continue;
+        if (parts[2] + '.html' !== parts[3]) continue;
+
+        var funnel    = parts[0];
+        var copyCode  = parts[1];
+        var bannerDir = parts[2];
+
+        var bannerHtml = await zip.files[path].async('string');
+        var assetBase  = funnel + '/' + copyCode + '/' + bannerDir + '/assets/';
+        bannerHtml = await inlineZipAssets(bannerHtml, zip, assetBase);
+
+        // Extract size from the last _WxH segment of the banner dir name
+        var szM     = bannerDir.match(/_(\d+x\d+)$/);
+        var sizeKey = szM ? szM[1] : bannerDir;
+
+        if (!groups[funnel]) groups[funnel] = {};
+        if (!groups[funnel][copyCode]) groups[funnel][copyCode] = [];
+        groups[funnel][copyCode].push({ sizeKey: sizeKey, bannerHtml: bannerHtml });
+        bannerCount++;
+      }
+
+      verticals.push({ name: vName, groups: groups });
+      mlog('  ✓ ' + vName + ': ' + bannerCount + ' banner(s) loaded', 'ok');
+    }
+
+    if (!verticals.length || !verticals.some(function(v) { return Object.keys(v.groups).length > 0; })) {
+      mlog('No valid banners found in the selected ZIPs.', 'err');
+      buildBtn.disabled = false;
+      buildBtn.textContent = 'Build Master Preview';
+      return;
+    }
+
+    mlog('Generating master-preview.html…', 'info');
+    var masterHtml = generateMasterPreviewHTML_multi(verticals);
+    var blob       = new Blob([masterHtml], { type: 'text/html;charset=utf-8' });
+    mlog('✓ Ready — ' + formatSize(blob.size) + '. Click Download to save.', 'ok');
+
+    infoEl.textContent = 'master-preview.html  ·  ' + formatSize(blob.size);
+    dlBtn.onclick = function() {
+      var url = URL.createObjectURL(blob);
+      var a   = document.createElement('a');
+      a.href = url; a.download = 'master-preview.html'; a.click();
+      URL.revokeObjectURL(url);
+    };
+    dlBtn.disabled = false;
+    footer.style.display = 'flex';
+
+  } catch (e) {
+    mlog('Error: ' + e.message, 'err');
+  }
+
+  buildBtn.disabled = false;
+  buildBtn.textContent = 'Build Master Preview';
+}
 </script>
 
 <script type="text/x-help" id="help-src">
