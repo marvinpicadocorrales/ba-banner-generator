@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BA Banner Generator – Help</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #07071a;
+    --bg-2:      #0d0d1f;
+    --bg-3:      #12122a;
+    --border:    #1e1e3a;
+    --border-hi: #2a2a4a;
+    --text:      #f0f0f8;
+    --text-2:    #a0a0c0;
+    --text-3:    #8080a0;
+    --purple:    #7c3aed;
+    --purple-lt: #a78bfa;
+    --green:     #4ade80;
+    --warn:      #fbbf24;
+    --pink:      #f472b6;
+    --error:     #f87171;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body { padding: 24px 20px 48px; max-width: 620px; margin: 0 auto; }
+
+  h1  { font-size: 18px; font-weight: 800; letter-spacing: -.01em; margin-bottom: 4px; }
+  h2  { font-size: 12px; font-weight: 700; color: var(--purple-lt); text-transform: uppercase; letter-spacing: .1em; margin: 0 0 6px; }
+  p   { color: var(--text-2); margin-bottom: 8px; font-size: 12px; }
+  a   { color: var(--purple-lt); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible { outline: 2px solid var(--purple-lt); outline-offset: 2px; border-radius: 2px; }
+  code { font-family: 'SF Mono', Menlo, monospace; font-size: 11px; background: var(--bg-3); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--green); }
+  ul  { color: var(--text-2); font-size: 12px; padding-left: 16px; margin-bottom: 8px; }
+  ul li { margin-bottom: 3px; }
+
+  .hero { margin-bottom: 20px; }
+  .hero-sub { color: var(--text-3); font-size: 12px; margin-top: 3px; }
+  .badge { display: inline-block; background: var(--purple); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .08em; padding: 2px 7px; border-radius: 20px; vertical-align: middle; margin-left: 6px; }
+
+  /* ── Section card ── */
+  .section-card { background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+  .section-head  { padding: 12px 14px; }
+  .section-summary { font-size: 12px; color: var(--text-2); margin-top: 3px; line-height: 1.5; }
+
+  /* ── Expand/collapse ── */
+  details { margin-top: 0; }
+  details > summary { list-style: none; display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 12px; font-weight: 600; color: var(--purple-lt); cursor: pointer; user-select: none; padding: 3px 4px; border-radius: 4px; }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary:focus-visible { outline: 2px solid var(--purple-lt); outline-offset: 2px; }
+  details > summary .arrow { font-size: 11px; transition: transform .2s; display: inline-block; }
+  details[open] > summary .arrow { transform: rotate(90deg); }
+  .details-body { padding: 12px 14px 14px; border-top: 1px solid var(--border); margin-top: 10px; }
+
+  /* ── Workflow steps ── */
+  .steps { display: flex; flex-direction: column; gap: 5px; }
+  .step  { display: flex; gap: 10px; align-items: baseline; }
+  .step-num   { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--purple); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .step-text  { font-size: 12px; color: var(--text-2); }
+  .step-text strong { color: var(--text); }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: rgba(255,255,255,.03); }
+  th { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border-hi); }
+  td { font-size: 11px; color: var(--text-2); padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  td:first-child { font-family: 'SF Mono', Menlo, monospace; color: var(--green); font-size: 11px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .table-wrap { background: var(--bg-3); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 10px; }
+
+  /* ── Callouts ── */
+  .callout { border-radius: 6px; padding: 9px 12px; margin-bottom: 10px; display: flex; gap: 9px; align-items: flex-start; }
+  .callout-icon { font-size: 14px; flex-shrink: 0; line-height: 1.5; }
+  .callout-body { flex: 1; font-size: 11px; color: var(--text-2); line-height: 1.6; }
+  .callout-body strong { color: var(--text); }
+  .callout.info  { background: #0f0f2e; border: 1px solid #2a2a5a; }
+  .callout.warn  { background: #1a1200; border: 1px solid #3a2800; }
+  .callout.tip   { background: #001a0f; border: 1px solid #003320; }
+
+  /* ── Fix steps (numbered inline) ── */
+  .fix-steps { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .fix-step  { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--text-2); }
+  .fix-step-num { flex-shrink: 0; font-size: 11px; font-weight: 700; color: var(--warn); background: rgba(251,191,36,.12); border: 1px solid rgba(251,191,36,.25); border-radius: 4px; padding: 1px 6px; margin-top: 1px; }
+
+  /* ── Filename anatomy ── */
+  .filename { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 10px; }
+  .fn-seg { padding: 3px 7px; border-radius: 4px; font-family: 'SF Mono', Menlo, monospace; font-size: 11px; font-weight: 600; }
+  .fn-sep { color: var(--text-3); align-self: center; font-weight: 700; font-size: 11px; }
+  .fn-brand    { background: #1a0a2e; color: #c084fc; border: 1px solid #3b1f6a; }
+  .fn-year     { background: #0a1a2e; color: #60a5fa; border: 1px solid #1f3f6a; }
+  .fn-vertical { background: #0a2e1a; color: var(--green); border: 1px solid #1f6a3f; }
+  .fn-campaign { background: #2e1a0a; color: #fb923c; border: 1px solid #6a3f1f; }
+  .fn-funnel   { background: #2e0a1a; color: var(--pink); border: 1px solid #6a1f3f; }
+  .fn-copy     { background: #1a2e0a; color: #a3e635; border: 1px solid #3f6a1f; }
+  .fn-channel  { background: #0a2e2e; color: #22d3ee; border: 1px solid #1f5a5a; }
+  .fn-type     { background: #1a1a0a; color: #fde68a; border: 1px solid #5a5a1f; }
+  .fn-date     { background: #2e0a2e; color: #e879f9; border: 1px solid #6a1f6a; }
+  .fn-size     { background: #1a1a1a; color: #9ca3af; border: 1px solid #3a3a3a; }
+
+  /* ── Output mode cards ── */
+  .output-cards { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .output-card { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+  .output-card-title { font-weight: 700; color: var(--text); font-size: 12px; margin-bottom: 3px; }
+  .output-card-desc  { color: var(--text-2); font-size: 11px; }
+  .output-card.preview { border-left: 3px solid var(--purple); }
+  .output-card.deliver { border-left: 3px solid var(--green); }
+
+  /* ── Control Panel diagram ── */
+  .cp-diagram { background: var(--bg); border: 1px dashed var(--border-hi); border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; }
+  .cp-section-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--purple-lt); margin-bottom: 8px; }
+  .cp-fields { display: flex; gap: 8px; flex-wrap: wrap; }
+  .cp-field { background: var(--bg-3); border: 1px solid var(--border); border-radius: 5px; padding: 6px 10px; }
+  .cp-field-name { font-size: 11px; color: var(--text-3); margin-bottom: 2px; font-family: 'SF Mono', Menlo, monospace; }
+  .cp-field-val  { font-size: 13px; font-weight: 700; color: var(--green); }
+
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+  .cta-row { display: flex; gap: 10px; margin-top: 4px; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 6px; background: var(--purple); color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; transition: opacity .15s; }
+  .btn-primary:hover { opacity: .85; text-decoration: none; }
+  .btn-primary:focus-visible { outline: 2px solid var(--purple-lt); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>BA Banner Generator <span class="badge">v1.7</span></h1>
+  <p class="hero-sub">Converts Figma banner frames into production-ready HTML5 animated banners.</p>
+</div>
+
+<!-- ── Workflow ───────────────────────────────────────────────────────────── -->
+<div class="section-card">
+  <div class="section-head">
+    <h2>Workflow</h2>
+    <div class="steps" style="margin-top:8px">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Scan</strong> — click ↺ Scan to read banner frames, sections and the Control Panel.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Select</strong> — choose which sizes and versions to export. All are checked by default.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Video</strong> — if banners have a video layer, load MP4s via 📁 Project (auto) or the Video Files panel (manual).</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Settings</strong> — set click URL, scene duration, fade time and date.</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-text"><strong>Convert</strong> — click Convert HTML5 Banners. Progress and warnings appear in the overlay.</div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-text"><strong>Download</strong> — <strong>Preview Bundle</strong> for QA review · <strong>Deliverables ZIP</strong> for trafficking.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Troubleshooting ────────────────────────────────────────────────────── -->
+<div class="section-card">
+  <div class="section-head">
+    <h2>Troubleshooting</h2>
+    <p class="section-summary">Common issues and how to fix them.</p>
+
+    <details>
+      <summary><span class="arrow">▶</span> Video missing from exported banner</summary>
+      <div class="details-body">
+        <div class="callout warn">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-body">The export log shows: <strong>⚠ No .mp4 for funnel TOF</strong><br>The banner will export with a static poster image instead of playing video.</div>
+        </div>
+        <p style="margin-bottom:6px">Three ways to fix it:</p>
+        <div class="fix-steps">
+          <div class="fix-step">
+            <span class="fix-step-num">1</span>
+            <span><strong>Auto-load from project folder</strong> — click <strong>📁 Project</strong> and pick your campaign folder. The plugin looks for <code>optimized-videos/[vertical]/</code> and loads any MP4 with <code>TOF</code>, <code>MOF</code> or <code>BOF</code> in the filename automatically.</span>
+          </div>
+          <div class="fix-step">
+            <span class="fix-step-num">2</span>
+            <span><strong>Manual per-funnel picker</strong> — in the Video Files panel, click the funnel button (TOF / MOF / BOF) and select the MP4 directly.</span>
+          </div>
+          <div class="fix-step">
+            <span class="fix-step-num">3</span>
+            <span><strong>Fallback single picker</strong> — in Settings, load one MP4 that applies to all funnels.</span>
+          </div>
+        </div>
+        <div class="callout info" style="margin-top:10px">
+          <span class="callout-icon">📂</span>
+          <div class="callout-body">
+            <strong>Expected folder structure for auto-load:</strong><br>
+            my-campaign/<br>
+            &nbsp;&nbsp;optimized-videos/<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;casino/<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;casino-<strong>tof</strong>-optimized.mp4<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;casino-<strong>mof</strong>-optimized.mp4<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;casino-<strong>bof</strong>-optimized.mp4<br><br>
+            Subfolder must match the vertical name (<code>casino</code>, <code>sports</code>). Filename must contain <code>TOF</code>, <code>MOF</code> or <code>BOF</code> (case-insensitive).
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="arrow">▶</span> Banner not appearing in the Sizes panel</summary>
+      <div class="details-body">
+        <p>The plugin matches frames by <strong>exact pixel dimensions</strong> and a name starting with the size (e.g. <code>300x250_...</code>). Check:</p>
+        <ul>
+          <li>Frame width and height match a known size exactly (no decimal rounding)</li>
+          <li>Frame name starts with <code>WIDTHxHEIGHT</code> (e.g. <code>728x90</code>)</li>
+          <li>Frame is not hidden</li>
+          <li>Frame lives inside a Section (or directly on the page in flat mode)</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="arrow">▶</span> Layer is hidden / missing from export</summary>
+      <div class="details-body">
+        <p>The export log will show: <strong>⚠ Layer "Name" is hidden in frame 1</strong>. Hidden layers in the first scene frame are skipped entirely — they won't appear in any scene.</p>
+        <ul>
+          <li>Make the layer visible in the first scene frame in Figma, then re-export.</li>
+          <li>If the layer is intentionally hidden in frame 1 but visible in later frames, it still won't export — move it to frame 1 with opacity 0 instead.</li>
+        </ul>
+      </div>
+    </details>
+
+  </div>
+</div>
+
+<!-- ── Section naming ─────────────────────────────────────────────────────── -->
+<div class="section-card">
+  <div class="section-head">
+    <h2>Section naming convention</h2>
+    <p class="section-summary">Section names encode campaign type, funnel and copy code — e.g. <code>TOF WLM</code> · <code>MOF OR-SC</code> · <code>BOF RR-500B</code></p>
+    <details>
+      <summary><span class="arrow">▶</span> Reference</summary>
+      <div class="details-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Section name</th><th>Campaign type</th><th>Funnel</th><th>Copy code</th></tr></thead>
+            <tbody>
+              <tr><td>TOF WLM</td><td>Targeted</td><td>TOF</td><td>WLM</td></tr>
+              <tr><td>MOF OR-SC</td><td>Organic Retargeting</td><td>MOF</td><td>SC</td></tr>
+              <tr><td>BOF RR-500B</td><td>Registered Retargeting</td><td>BOF</td><td>500B</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>No prefix = <strong>Targeted</strong> &nbsp;·&nbsp; <code>OR-</code> = Organic Retargeting &nbsp;·&nbsp; <code>RR-</code> = Registered Retargeting. The campaign type becomes the top-level output folder.</p>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ── Layer naming ───────────────────────────────────────────────────────── -->
+<div class="section-card">
+  <div class="section-head">
+    <h2>Layer naming rules</h2>
+    <p class="section-summary">Layer names determine animation role: <code>Master (1)</code> scene · <code>TOF 1</code> offer copy · <code>CTA TOF</code> pulse · <code>T&amp;Cs Apply</code> static.</p>
+    <details>
+      <summary><span class="arrow">▶</span> Full reference</summary>
+      <div class="details-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Layer name</th><th>Role</th><th>Behaviour</th></tr></thead>
+            <tbody>
+              <tr><td>Master (1), Master (2)…</td><td>Scene background</td><td>Cross-fades between scenes.</td></tr>
+              <tr><td>TOF 1, TOF 2…<br>MOF 1… / BOF 1…</td><td>Offer copy</td><td>Animates across scenes. Trailing number stripped so all frames share one key.</td></tr>
+              <tr><td>CTA TOF / CTA MOF / CTA BOF</td><td>CTA button</td><td>Always visible, pulse animation.</td></tr>
+              <tr><td>CTA + Logo</td><td>Combined group</td><td>Auto-expanded into Logo + CTA sub-layers.</td></tr>
+              <tr><td>BA_Logo… / Logo…</td><td>Logo</td><td>Always visible, no animation.</td></tr>
+              <tr><td>T&amp;Cs Apply</td><td>Legal disclaimer</td><td>Always static.</td></tr>
+              <tr><td>Shadow… / Gradient… / Rectangle N</td><td>Overlay</td><td>Composited as one PNG, always above video.</td></tr>
+              <tr><td>Video</td><td>Video placeholder</td><td>Replaced by the loaded MP4.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout tip">
+          <span class="callout-icon">✅</span>
+          <div class="callout-body">Layer names are case-insensitive. <code>CTA BOF</code> and <code>cta bof</code> are treated the same.</div>
+        </div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ── Control Panel ──────────────────────────────────────────────────────── -->
+<div class="section-card">
+  <div class="section-head">
+    <h2>Control Panel</h2>
+    <p class="section-summary">A Figma Section named <code>Control Panel</code> with TEXT layers <code>vertical</code> and <code>campaign</code> — auto-fills the plugin fields on scan.</p>
+    <details>
+      <summary><span class="arrow">▶</span> Setup</summary>
+      <div class="details-body">
+        <div class="cp-diagram">
+          <div class="cp-section-label">🗂 Control Panel <span style="color:var(--text-3);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0">(Figma Section)</span></div>
+          <div class="cp-fields">
+            <div class="cp-field"><div class="cp-field-name">vertical</div><div class="cp-field-val">CS</div></div>
+            <div class="cp-field"><div class="cp-field-name">campaign</div><div class="cp-field-val">W4</div></div>
+          </div>
+        </div>
+        <div class="callout warn">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-body">Section must be named exactly <strong>"Control Panel"</strong>. TEXT layers must be named exactly <code>vertical</code> and <code>campaign</code>. If missing, those fields will be blank in the output filename.</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>TEXT layer</th><th>Example values</th></tr></thead>
+            <tbody>
+              <tr><td>vertical</td><td><code>C</code> Casino · <code>S</code> Sports · <code>CS</code> Dual</td></tr>
+              <tr><td>campaign</td><td><code>W4</code> · <code>LNY</code> · <code>XMAS</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ── Output modes ───────────────────────────────────────────────────────── -->
+<div class="section-card">
+  <div class="section-head">
+    <h2>Output modes</h2>
+    <p class="section-summary">Two download options — Preview for QA, Deliverables for trafficking.</p>
+    <details>
+      <summary><span class="arrow">▶</span> More info</summary>
+      <div class="details-body">
+        <div class="output-cards">
+          <div class="output-card preview">
+            <div class="output-card-title">⬇ Preview Bundle</div>
+            <div class="output-card-desc">Single self-contained <code>preview.html</code> — all banners inlined, open directly in any browser. Funnel tabs + copy code pills for easy navigation. Share with QA without extracting anything.</div>
+          </div>
+          <div class="output-card deliver">
+            <div class="output-card-title">⬇ Deliverables ZIP</div>
+            <div class="output-card-desc">Each banner size as its own <code>.zip</code>, structured as <code>CampaignType / Funnel / CopyCode /</code>. Ready for ad platform trafficking. Outer ZIP named after the vertical (e.g. <code>Casino.zip</code>).</div>
+          </div>
+        </div>
+        <p>The <strong>⊞ Master Preview</strong> button lets you combine Casino, Sports and Dual ZIPs into one <code>master-preview.html</code> with vertical tabs.</p>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ── Output filename ───────────────────────────────────────────────────── -->
+<div class="section-card">
+  <div class="section-head">
+    <h2>Output filename format</h2>
+    <p class="section-summary"><code>BA_2026_CS_W4_TOF_WLM_DISPLAY_DYN_20260504_300x250</code></p>
+    <details>
+      <summary><span class="arrow">▶</span> Segment breakdown</summary>
+      <div class="details-body">
+        <div class="filename">
+          <span class="fn-seg fn-brand">BA</span><span class="fn-sep">_</span>
+          <span class="fn-seg fn-year">2026</span><span class="fn-sep">_</span>
+          <span class="fn-seg fn-vertical">CS</span><span class="fn-sep">_</span>
+          <span class="fn-seg fn-campaign">W4</span><span class="fn-sep">_</span>
+          <span class="fn-seg fn-funnel">TOF</span><span class="fn-sep">_</span>
+          <span class="fn-seg fn-copy">WLM</span><span class="fn-sep">_</span>
+          <span class="fn-seg fn-channel">DISPLAY</span><span class="fn-sep">_</span>
+          <span class="fn-seg fn-type">DYN</span><span class="fn-sep">_</span>
+          <span class="fn-seg fn-date">20260504</span><span class="fn-sep">_</span>
+          <span class="fn-seg fn-size">300x250</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Segment</th><th>Source</th></tr></thead>
+            <tbody>
+              <tr><td>BA</td><td>Fixed brand prefix</td></tr>
+              <tr><td>2026</td><td>Year — extracted from the date field</td></tr>
+              <tr><td>CS</td><td>Vertical — Control Panel or File Naming panel</td></tr>
+              <tr><td>W4</td><td>Campaign — Control Panel or File Naming panel</td></tr>
+              <tr><td>TOF</td><td>Funnel — from the Section name</td></tr>
+              <tr><td>WLM</td><td>Copy code — from the Section name</td></tr>
+              <tr><td>DISPLAY</td><td>Fixed — channel</td></tr>
+              <tr><td>DYN</td><td>Fixed — type</td></tr>
+              <tr><td>20260504</td><td>Date — from File Naming panel</td></tr>
+              <tr><td>300x250</td><td>Banner size</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="cta-row">
+  <a class="btn-primary" href="https://www.figma.com/design/gYRWPQdgwNdUjgHhXnNHLv/Paid-Media-Wave-4?node-id=4008-10581&t=0SCLvSRj4K0Roi5Q-1" target="_blank">
+    ✦ Open Figma Template
+  </a>
+</div>
+
+</body>
+</html>

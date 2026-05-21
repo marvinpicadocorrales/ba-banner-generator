@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="ad.size" content="width=300,height=250">
+<title>BA Banner – 300×250</title>
+
+<!-- ── Shared styles: fonts, animations, base layout ── -->
+<link rel="stylesheet" href="../../../Assets/css/shared.css">
+
+<!-- ── Shared logic: clickTag + 30s animation stop ── -->
+<script src="../../../Assets/js/shared.js"></script>
+
+<style>
+@font-face { font-family: 'Aeonik'; font-weight: 400; font-style: normal; src: url('fonts/Aeonik-Regular.otf') format('opentype'); }
+@font-face { font-family: 'Aeonik'; font-weight: 700; font-style: normal; src: url('fonts/Aeonik-Bold.otf') format('opentype'); }
+
+/* ============================================================
+   300×250 — Two-column layout
+   Left column: video  |  Right column: copy + CTA
+   ============================================================ */
+
+.banner {
+  width: 300px;
+  height: 250px;
+  padding: 0;
+  /* override shared flex defaults — layout handled by .layout-250 */
+  display: block;
+}
+
+/* ── Video: full-bleed background (fallback = banner background #0d000f) ── */
+/* .video-bg and .video-bg video styles come from shared.css */
+
+/* ── Full content overlay ── */
+.layout-250 {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 16px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+/* Logo row: full width */
+.logo-container {
+  height: 34px;
+  width: 100%;
+  overflow: hidden;
+  flex-shrink: 0;
+  animation: enter-up 0.5s ease both 0s;
+}
+.logo { width: 132px; height: 28px; display: block; }
+
+/* Mid row: left spacer + right content */
+.mid-row {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 0;
+}
+.col-space { flex: 1; }
+.col-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  animation: enter-up 0.5s ease both 0.2s;
+}
+
+/* Copy container — override shared (no enter-up; col-right handles it) */
+.copy-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  position: relative;
+  animation: none;   /* suppressed — col-right animates instead */
+}
+.copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: left;
+  text-shadow: 0px 6.836px 51.1px rgba(9, 1, 14, 0.9);
+}
+.copy-gold,
+.copy-white { font-size: 17px; line-height: 1.2; }
+
+/* ── Copy 2: "Up To" offer frame ── */
+.copy-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+}
+.copy-2 p .copy-gold,
+.copy-2 p .copy-white   { font-size: 15px; line-height: 0.95; }
+.upto-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+}
+.copy-upto-label {
+  font-size: 18px;
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 0.44px;
+  width: 30px;
+  flex-shrink: 0;
+}
+.copy-upto-amount {
+  font-size: 36px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Bottom: CTA + T&Cs — override shared width/animation */
+.bottom {
+  width: 100%;
+  flex-shrink: 0;
+  animation: none;  /* suppressed — col-right animates instead */
+  gap: 4px;
+}
+.cta   { height: 32px; }
+.cta-label { font-size: 13px; letter-spacing: 0.52px; }
+</style>
+</head>
+<body>
+
+<div class="banner">
+
+  <!-- CLICK OVERLAY: full-banner clickable area (IAB / Google required) -->
+  <a class="click-overlay"
+     href="javascript:void(0)"
+     onclick="window.open(clickTag)"
+     aria-label="Learn more"></a>
+
+  <!-- VIDEO: full-bleed background (fallback = banner background #0d000f) -->
+  <div class="video-bg">
+    <video autoplay muted loop playsinline>
+      <source src="video/300x250.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- CONTENT LAYOUT: logo row + mid row -->
+  <div class="layout-250">
+
+    <!-- Logo: full width -->
+    <div class="logo-container">
+      <!-- BA General logo (132×28) -->
+      <svg class="logo" width="132" height="28" viewBox="0 0 132 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g clip-path="url(#clip0_300250)">
+        <path d="M31.0187 4.86688C32.5097 4.86688 33.6578 5.18891 34.4671 5.83736C35.2808 6.48141 35.6855 7.37249 35.6855 8.51943C35.6855 9.35316 35.4699 10.0413 35.0433 10.5883C34.6166 11.1353 33.992 11.5147 33.1739 11.7264C35.2412 12.119 36.2749 13.2439 36.2749 15.0967C36.2749 16.3053 35.835 17.2582 34.9597 17.9552C34.08 18.6477 32.8176 18.9918 31.1682 18.9918H26.0396V4.86688H31.0318H31.0231H31.0187ZM27.7814 11.003H31.0978C31.9951 11.003 32.6945 10.8001 33.1915 10.3986C33.6885 9.99721 33.9349 9.43697 33.9349 8.72235C33.9349 8.00772 33.6885 7.4519 33.2003 7.05929C32.7121 6.66669 32.0127 6.46377 31.1022 6.46377H27.7858V11.0074L27.7814 11.003ZM27.7814 17.3993H31.1638C32.2326 17.3993 33.0596 17.1876 33.627 16.7729C34.1944 16.3583 34.4803 15.776 34.4803 15.0393C34.4803 14.2453 34.1944 13.6365 33.6138 13.213C33.042 12.794 32.2194 12.5734 31.155 12.5734H27.7726V17.3949H27.7814V17.3993Z" fill="white"/>
+        <path d="M38.5709 11.0868C38.9755 10.2928 39.5517 9.67522 40.2907 9.2385C41.0252 8.80179 41.8741 8.58563 42.8242 8.58563C43.7743 8.58563 44.5968 8.78414 45.3182 9.16792C46.0395 9.56053 46.6113 10.1208 47.0248 10.8619C47.4382 11.5985 47.6626 12.4676 47.689 13.4645C47.689 13.6101 47.6758 13.8527 47.645 14.1747H39.6793V14.3159C39.7057 15.3261 40.0136 16.1333 40.603 16.7377C41.1924 17.342 41.9621 17.642 42.9122 17.642C43.6467 17.642 44.2757 17.4611 44.7948 17.0862C45.3138 16.7156 45.6569 16.2039 45.8328 15.5422H47.5042C47.3019 16.5877 46.7961 17.4523 45.9911 18.1096C45.1862 18.7713 44.201 19.1065 43.0354 19.1065C42.0149 19.1065 41.1264 18.8904 40.3611 18.4537C39.6001 18.017 39.0019 17.3994 38.5841 16.6009C38.1662 15.8025 37.9463 14.8805 37.9463 13.8483C37.9463 12.8161 38.1486 11.8765 38.5621 11.0824L38.5709 11.0868ZM45.9867 12.7984C45.912 11.9206 45.5821 11.2456 45.0147 10.7648C44.4473 10.2796 43.7259 10.0414 42.8506 10.0414C42.0721 10.0414 41.3859 10.2928 40.8009 10.8045C40.2115 11.3162 39.8772 11.9823 39.7937 12.8072H45.9867V12.7984Z" fill="white"/>
+        <path d="M50.1477 10.2178H48.3003V8.70035H50.1477V5.81537H51.8015V8.70035H54.3966V10.2178H51.8015V16.2878C51.8015 16.7157 51.8851 17.0244 52.0522 17.2053C52.2194 17.3862 52.5141 17.4788 52.9275 17.4788H54.7177V18.9963H52.8263C51.8587 18.9963 51.1725 18.7801 50.7635 18.3522C50.3588 17.9243 50.1477 17.245 50.1477 16.3186V10.2178Z" fill="white"/>
+        <path d="M54.9729 18.9918L60.3435 4.86688H62.4152L67.7637 18.9918H65.8944L64.4033 15.1805H58.2674L56.7763 18.9918H54.9641H54.9773H54.9729ZM58.7952 13.588H63.8843L61.3287 6.78579L58.7952 13.588Z" fill="white"/>
+        <path d="M77.1545 9.71056C77.911 10.4605 78.2893 11.6471 78.2893 13.2616V18.9875H76.6355V13.3587C76.6355 12.3 76.3979 11.4839 75.9229 10.9281C75.4479 10.3723 74.7617 10.0943 73.8556 10.0943C72.8879 10.0943 72.1358 10.4296 71.5816 11.1045C71.0274 11.7795 70.7547 12.6926 70.7547 13.8483V18.9919H69.1008V8.70038H70.5303L70.7547 10.0899C71.5332 9.07975 72.6592 8.57245 74.1371 8.57245C75.3819 8.57245 76.3847 8.95182 77.1457 9.70174H77.1545V9.71056Z" fill="white"/>
+        <path d="M80.8185 8.70917L83.9766 17.1038L87.0336 8.70917H88.7842L84.0602 20.7343C83.8227 21.3519 83.6071 21.8151 83.418 22.1239C83.2289 22.4327 83.0001 22.6665 82.7098 22.812C82.4283 22.9576 82.0501 23.037 81.5838 23.037H79.6089V21.5195H81.078C81.3991 21.5195 81.6366 21.4842 81.7993 21.4225C81.9621 21.3519 82.094 21.246 82.1908 21.0916C82.2876 20.9372 82.4151 20.677 82.5603 20.3108L83.0837 19.0845L79.0591 8.71799H80.8097L80.8185 8.70917Z" fill="white"/>
+        <path d="M90.0159 5.82422H91.6697V8.7092H94.2648V10.2267H91.6697V16.2966C91.6697 16.7245 91.7533 17.0333 91.9204 17.2142C92.0876 17.395 92.3823 17.4877 92.7957 17.4877H94.5859V19.0051H92.6946C91.7269 19.0051 91.0407 18.789 90.6273 18.3611C90.2226 17.9332 90.0115 17.2539 90.0115 16.3231V5.82422H90.0159Z" fill="white"/>
+        <path d="M103.792 9.71047C104.553 10.4604 104.94 11.647 104.94 13.2616V18.9874H103.286V13.3586C103.286 12.2999 103.049 11.4838 102.565 10.928C102.081 10.3722 101.39 10.0943 100.493 10.0943C99.543 10.0943 98.7864 10.4295 98.2322 11.1044C97.6736 11.7794 97.4009 12.6925 97.4009 13.8483V18.9918H95.7471V4.86688H97.4009V10.3898C97.7352 9.84722 98.1838 9.41492 98.738 9.07525C99.2923 8.73999 99.9784 8.56795 100.783 8.56795C102.028 8.56795 103.035 8.94732 103.801 9.69724L103.792 9.70606V9.71047Z" fill="white"/>
+        <path d="M108.643 5.03019C108.846 5.23311 108.943 5.48455 108.943 5.79334C108.943 6.10213 108.846 6.35358 108.643 6.5565C108.441 6.75942 108.19 6.85646 107.883 6.85646C107.575 6.85646 107.324 6.75942 107.122 6.5565C106.919 6.35358 106.823 6.10213 106.823 5.79334C106.823 5.48455 106.919 5.23311 107.122 5.03019C107.324 4.82727 107.575 4.73022 107.883 4.73022C108.19 4.73022 108.441 4.82727 108.643 5.03019ZM107.056 8.7092H108.709V19.0007H107.056V8.7092Z" fill="white"/>
+        <path d="M118.989 9.71056C119.745 10.4605 120.124 11.6471 120.124 13.2616V18.9875H118.47V13.3587C118.47 12.3 118.232 11.4839 117.757 10.9281C117.282 10.3723 116.596 10.0943 115.69 10.0943C114.722 10.0943 113.97 10.4296 113.416 11.1045C112.862 11.7795 112.589 12.6926 112.589 13.8483V18.9919H110.935V8.70038H112.365L112.589 10.0899C113.367 9.07975 114.493 8.57245 115.971 8.57245C117.216 8.57245 118.219 8.95182 118.98 9.70174H118.989V9.71056Z" fill="white"/>
+        <path d="M131.977 8.70918V18.4934C131.977 21.6034 130.284 23.1561 126.888 23.1561C125.56 23.1561 124.482 22.8562 123.642 22.2518C122.802 21.6475 122.318 20.7829 122.186 19.6668H123.875C124.007 20.3109 124.35 20.8093 124.905 21.1622C125.459 21.5151 126.158 21.6872 127.02 21.6872C129.233 21.6872 130.337 20.6064 130.337 18.4361V17.2274C129.602 18.489 128.428 19.1242 126.818 19.1242C125.868 19.1242 125.019 18.9125 124.271 18.4978C123.528 18.0832 122.943 17.4744 122.521 16.6804C122.103 15.8863 121.883 14.9467 121.883 13.8571C121.883 12.7676 122.094 11.9074 122.521 11.1133C122.943 10.3193 123.528 9.70172 124.28 9.26059C125.028 8.81946 125.877 8.59448 126.814 8.59448C127.645 8.59448 128.353 8.7577 128.947 9.08414C129.536 9.41498 129.998 9.88258 130.332 10.4869L130.557 8.70918H131.986V8.70035L131.977 8.70918ZM128.722 17.1656C129.242 16.848 129.642 16.4069 129.919 15.8334C130.2 15.2643 130.337 14.6115 130.337 13.888C130.337 13.1646 130.196 12.4852 129.919 11.9029C129.637 11.3207 129.242 10.8619 128.722 10.5399C128.203 10.2178 127.618 10.0546 126.967 10.0546C125.947 10.0546 125.129 10.4075 124.504 11.1133C123.88 11.8235 123.567 12.7279 123.567 13.8439C123.567 14.96 123.884 15.8731 124.504 16.5745C125.129 17.2759 125.947 17.6332 126.967 17.6332C127.627 17.6332 128.212 17.4788 128.722 17.1568V17.1656Z" fill="white"/>
+        <path d="M2.50323 7.67682L0.0532698 14.1394C0.0180818 14.2364 0.00928476 14.329 0.0312773 14.4217C0.0884578 14.6819 0.365563 14.8716 0.655864 14.7746C3.98553 13.6144 14.8498 9.42369 15.1577 3.80371C15.1577 3.80371 15.7823 -1.38396 6.29034 0.371729C6.19797 0.384963 6.15839 0.464367 6.16279 0.534947C6.17158 0.605528 6.21117 0.676108 6.30354 0.680519C7.76824 0.843737 10.0906 0.914318 10.0906 2.50679C10.0906 5.41383 3.89756 6.90043 2.76275 7.41214C2.64399 7.46067 2.56041 7.55771 2.51203 7.67682H2.50323Z" fill="url(#paint0_linear_300250)"/>
+        <path d="M4.18341 18.9565L1.40356 27.2409C1.35518 27.3821 1.37717 27.5233 1.43875 27.6335C1.54431 27.8144 1.77304 27.9291 2.00616 27.8497C5.46338 26.7072 17.7132 22.1547 19.2747 14.9246C19.5606 13.5924 19.3494 12.1852 18.5973 11.0559C17.8276 9.89577 16.3497 8.74001 13.539 8.71796C13.4818 8.71796 13.4335 8.74001 13.3939 8.7753L11.5597 10.3193C11.4981 10.3766 11.4673 10.4516 11.4805 10.531C11.4937 10.6104 11.5377 10.6722 11.6125 10.7074C12.8792 11.25 16.5036 13.5307 4.46052 18.6742C4.39894 18.7007 4.34176 18.736 4.29778 18.7845C4.25379 18.833 4.2142 18.8948 4.19221 18.961L4.18341 18.9521V18.9565Z" fill="url(#paint1_linear_300250)"/>
+        </g>
+        <defs>
+        <linearGradient id="paint0_linear_300250" x1="2.70556" y1="3.60961" x2="26.7674" y2="27.0652" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#C47E0A"/><stop offset="0.13" stop-color="#CB8512"/><stop offset="0.52" stop-color="#DEB84E"/><stop offset="0.83" stop-color="#D8AC40"/><stop offset="1" stop-color="#A57A00"/>
+        </linearGradient>
+        <linearGradient id="paint1_linear_300250" x1="-1.53024" y1="7.95921" x2="22.5316" y2="31.4148" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#C47E0A"/><stop offset="0.13" stop-color="#CB8512"/><stop offset="0.52" stop-color="#DEB84E"/><stop offset="0.83" stop-color="#D8AC40"/><stop offset="1" stop-color="#A57A00"/>
+        </linearGradient>
+        <clipPath id="clip0_300250"><rect width="132" height="28" fill="white"/></clipPath>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- Mid row: left spacer (video behind) + right content -->
+    <div class="mid-row">
+      <div class="col-space"></div>
+      <div class="col-right">
+
+        <!-- Copy -->
+        <div class="copy-container">
+          <div class="copy copy-1">
+            <p class="copy-gold">Every spin. Every moment.</p>
+            <p class="copy-white">Pure adrenaline.</p>
+          </div>
+          <div class="copy copy-2">
+            <p><span class="copy-gold">100%</span><span class="copy-white"> Bonus</span></p>
+            <div class="upto-row">
+              <span class="copy-white copy-upto-label">UP TO</span>
+              <span class="copy-gold copy-upto-amount">$500</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA + T&Cs -->
+        <div class="bottom">
+          <div class="cta">
+            <span class="cta-label">Learn more</span>
+          </div>
+          <p class="tcs">T&amp;Cs Apply</p>
+        </div>
+
+      </div><!-- /col-right -->
+    </div><!-- /mid-row -->
+
+  </div><!-- /layout-250 -->
+
+</div><!-- /banner -->
+
+</body>
+</html>

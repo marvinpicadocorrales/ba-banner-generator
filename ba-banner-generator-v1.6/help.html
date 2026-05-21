@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BA Banner Generator – Help</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #07071a;
+    --bg-2:      #0d0d1f;
+    --bg-3:      #12122a;
+    --border:    #1e1e3a;
+    --border-hi: #2a2a4a;
+    --text:      #f0f0f8;
+    --text-2:    #a0a0c0;
+    --text-3:    #606080;
+    --purple:    #7c3aed;
+    --purple-lt: #a78bfa;
+    --green:     #4ade80;
+    --warn:      #fbbf24;
+    --pink:      #f472b6;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    padding: 28px 24px 48px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  /* ── Typography ── */
+  h1 { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -.01em; margin-bottom: 4px; }
+  h2 { font-size: 13px; font-weight: 700; color: var(--purple-lt); text-transform: uppercase; letter-spacing: .1em; margin: 36px 0 12px; display: flex; align-items: center; gap: 8px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  h3 { font-size: 12px; font-weight: 700; color: var(--text); margin: 16px 0 6px; }
+  p  { color: var(--text-2); margin-bottom: 10px; }
+  a  { color: var(--purple-lt); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { font-family: 'SF Mono', Menlo, monospace; font-size: 11px; background: var(--bg-3); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--green); }
+
+  /* ── Hero ── */
+  .hero { margin-bottom: 8px; }
+  .hero-sub { color: var(--text-3); font-size: 12px; }
+  .badge { display: inline-block; background: var(--purple); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .08em; padding: 2px 7px; border-radius: 20px; vertical-align: middle; margin-left: 6px; }
+
+  /* ── Steps ── */
+  .steps { display: flex; flex-direction: column; gap: 8px; }
+  .step { display: flex; gap: 12px; align-items: flex-start; background: var(--bg-3); border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; }
+  .step-num { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--purple); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+  .step-body { flex: 1; }
+  .step-title { font-weight: 700; color: var(--text); font-size: 12px; margin-bottom: 2px; }
+  .step-desc  { color: var(--text-2); font-size: 12px; }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+  thead tr { background: var(--bg-3); }
+  th { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--border-hi); }
+  td { font-size: 12px; color: var(--text-2); padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  td:first-child { font-family: 'SF Mono', Menlo, monospace; color: var(--green); font-size: 11px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .table-wrap { background: var(--bg-3); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; margin-bottom: 12px; }
+
+  /* ── Callout boxes ── */
+  .callout { border-radius: 7px; padding: 10px 14px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .callout-icon { font-size: 16px; flex-shrink: 0; line-height: 1.4; }
+  .callout-body { flex: 1; font-size: 12px; color: var(--text-2); line-height: 1.55; }
+  .callout-body strong { color: var(--text); }
+  .callout.info  { background: #0f0f2e; border: 1px solid #2a2a5a; }
+  .callout.warn  { background: #1a1200; border: 1px solid #3a2800; }
+  .callout.tip   { background: #001a0f; border: 1px solid #003320; }
+
+  /* ── Filename anatomy ── */
+  .filename { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 12px; }
+  .fn-seg { padding: 3px 8px; border-radius: 4px; font-family: 'SF Mono', Menlo, monospace; font-size: 11px; font-weight: 600; }
+  .fn-sep { color: var(--text-3); align-self: center; font-weight: 700; }
+  .fn-brand    { background: #1a0a2e; color: #c084fc; border: 1px solid #3b1f6a; }
+  .fn-year     { background: #0a1a2e; color: #60a5fa; border: 1px solid #1f3f6a; }
+  .fn-vertical { background: #0a2e1a; color: var(--green); border: 1px solid #1f6a3f; }
+  .fn-campaign { background: #2e1a0a; color: #fb923c; border: 1px solid #6a3f1f; }
+  .fn-funnel   { background: #2e0a1a; color: var(--pink); border: 1px solid #6a1f3f; }
+  .fn-copy     { background: #1a2e0a; color: #a3e635; border: 1px solid #3f6a1f; }
+  .fn-channel  { background: #0a2e2e; color: #22d3ee; border: 1px solid #1f5a5a; }
+  .fn-type     { background: #1a1a0a; color: #fde68a; border: 1px solid #5a5a1f; }
+  .fn-date     { background: #2e0a2e; color: #e879f9; border: 1px solid #6a1f6a; }
+  .fn-size     { background: #1a1a1a; color: #9ca3af; border: 1px solid #3a3a3a; }
+  .fn-legend { display: flex; flex-direction: column; gap: 4px; }
+  .fn-legend-row { display: flex; gap: 8px; align-items: center; font-size: 11px; }
+  .fn-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── Control panel diagram ── */
+  .cp-diagram { background: var(--bg-3); border: 1px solid var(--border-hi); border-radius: 7px; padding: 14px 16px; margin-bottom: 12px; }
+  .cp-section-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--purple-lt); margin-bottom: 8px; }
+  .cp-fields { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cp-field { background: var(--bg); border: 1px dashed var(--border-hi); border-radius: 5px; padding: 7px 12px; }
+  .cp-field-name { font-size: 10px; color: var(--text-3); margin-bottom: 3px; font-family: 'SF Mono', Menlo, monospace; }
+  .cp-field-val  { font-size: 13px; font-weight: 700; color: var(--green); }
+
+  /* ── CTA ── */
+  .cta-row { display: flex; gap: 10px; margin-top: 8px; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 6px; background: var(--purple); color: #fff; border: none; border-radius: 6px; padding: 9px 18px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; transition: opacity .15s; }
+  .btn-primary:hover { opacity: .85; text-decoration: none; }
+  .btn-ghost { display: inline-flex; align-items: center; gap: 6px; background: transparent; color: var(--text-2); border: 1px solid var(--border-hi); border-radius: 6px; padding: 9px 18px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; transition: opacity .15s; }
+  .btn-ghost:hover { opacity: .85; text-decoration: none; }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: var(--border); margin: 32px 0; }
+</style>
+</head>
+<body>
+
+<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+<div class="hero">
+  <h1>BA Banner Generator <span class="badge">v1.5</span></h1>
+  <p class="hero-sub">Converts Figma banner frames into production-ready HTML5 animated banners, packaged as a ZIP ready for trafficking.</p>
+</div>
+
+<!-- ── What it does ───────────────────────────────────────────────────────── -->
+<h2>What it does</h2>
+<p>The plugin scans the current Figma page, finds banner frames organised by size (<code>300x250</code>, <code>728x90</code>, etc.), exports every layer as a PNG, and builds an animated HTML5 banner that cross-fades between scenes. If your file uses <strong>Sections</strong> (one per funnel/copy variation), it exports a separate banner per section and packages everything into a structured master ZIP with preview pages.</p>
+
+<!-- ── Figma file structure ───────────────────────────────────────────────── -->
+<h2>Figma file structure</h2>
+
+<h3>Banner frames</h3>
+<p>Each banner size lives in its own Figma frame, named exactly by its pixel dimensions:</p>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Frame name</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td>300x600</td><td>300 × 600 px — Half Page</td></tr>
+      <tr><td>160x600</td><td>160 × 600 px — Wide Skyscraper</td></tr>
+      <tr><td>320x480</td><td>320 × 480 px — Interstitial</td></tr>
+      <tr><td>300x250</td><td>300 × 250 px — MPU</td></tr>
+      <tr><td>728x90</td><td>728 × 90 px — Leaderboard</td></tr>
+      <tr><td>320x50</td><td>320 × 50 px — Mobile Banner</td></tr>
+      <tr><td>300x50</td><td>300 × 50 px — Mobile Banner</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>Multiple scenes</h3>
+<p>To create an animated banner with multiple scenes, place several frames of the <strong>same size</strong> side by side on the page. The plugin detects them automatically and cross-fades between them.</p>
+
+<div class="callout info">
+  <span class="callout-icon">💡</span>
+  <div class="callout-body">Scene frames don't need special names — the plugin groups all frames of the same size together. Just keep them on the same page.</div>
+</div>
+
+<h3>Sections (multi-funnel exports)</h3>
+<p>Wrap your banner frames inside a Figma <strong>Section</strong> to produce separate exports per funnel and copy variation. Name each section using the format <code>FUNNEL_COPYCODE</code>:</p>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Section name</th><th>Funnel</th><th>Copy code</th></tr></thead>
+    <tbody>
+      <tr><td>TOF_LNY01</td><td>TOF — Top of Funnel</td><td>LNY01</td></tr>
+      <tr><td>MOF_LNY01</td><td>MOF — Middle of Funnel</td><td>LNY01</td></tr>
+      <tr><td>BOF_LNY01</td><td>BOF — Bottom of Funnel</td><td>LNY01</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── Control Panel ──────────────────────────────────────────────────────── -->
+<h2>Control Panel</h2>
+<p>The plugin reads campaign metadata directly from a Figma <strong>Section</strong> named <code>Control Panel</code> (case-insensitive) placed anywhere on the page. Inside it, add TEXT layers with these exact names:</p>
+
+<div class="cp-diagram">
+  <div class="cp-section-label">🗂 Control Panel  <span style="color:var(--text-3);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0">(Figma Section)</span></div>
+  <div class="cp-fields">
+    <div class="cp-field">
+      <div class="cp-field-name">vertical</div>
+      <div class="cp-field-val">C</div>
+    </div>
+    <div class="cp-field">
+      <div class="cp-field-name">campaign</div>
+      <div class="cp-field-val">LNY</div>
+    </div>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>TEXT layer name</th><th>What to type</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>vertical</td><td>Single letter vertical code</td><td><code>C</code> Casino · <code>S</code> Sports · <code>D</code> Dual</td></tr>
+      <tr><td>campaign</td><td>Campaign short code</td><td><code>LNY</code> · <code>W3</code> · <code>XMAS</code></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="callout warn">
+  <span class="callout-icon">⚠️</span>
+  <div class="callout-body"><strong>The Section must be named exactly "Control Panel"</strong> (any case). The TEXT layers inside must be named exactly <code>vertical</code> and <code>campaign</code>. If missing, those fields will be blank in the exported filename.</div>
+</div>
+
+<!-- ── Layer naming ───────────────────────────────────────────────────────── -->
+<h2>Layer naming rules</h2>
+<p>The plugin assigns a role to each layer based on its name. Get the names right and everything animates, pulses and composites correctly.</p>
+
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Layer name</th><th>Role</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Master (1)<br>Master (2)…</td>
+        <td>Scene background</td>
+        <td>Cross-fades between scenes. One per frame.</td>
+      </tr>
+      <tr>
+        <td>CTA TOF<br>CTA MOF<br>CTA BOF</td>
+        <td>Call-to-action button</td>
+        <td>Always visible, pulses with a scale animation.</td>
+      </tr>
+      <tr>
+        <td>CTA + Logo</td>
+        <td>Combined group</td>
+        <td>Expanded into Logo + CTA sub-layers automatically.</td>
+      </tr>
+      <tr>
+        <td>BA_Logo<br>Logo</td>
+        <td>Logo</td>
+        <td>Always visible, no animation.</td>
+      </tr>
+      <tr>
+        <td>Shadow Right<br>Shadow Top<br>Shadow Bottom</td>
+        <td>Shadow overlay</td>
+        <td>Exported as a single composite PNG, always above the video layer.</td>
+      </tr>
+      <tr>
+        <td>Gradient<br>Gradiente<br>Overlay_*</td>
+        <td>Gradient overlay</td>
+        <td>Same as shadow — composited, always visible.</td>
+      </tr>
+      <tr>
+        <td>video.webm</td>
+        <td>Video placeholder</td>
+        <td>Replaced by the MP4 you load in the Video Files panel.</td>
+      </tr>
+      <tr>
+        <td>T&amp;C Apply</td>
+        <td>Legal text</td>
+        <td>Static, vertically centred on leaderboard and mobile sizes.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="callout tip">
+  <span class="callout-icon">✅</span>
+  <div class="callout-body"><strong>Tip:</strong> Layer names are case-insensitive. <code>CTA BOF</code>, <code>cta bof</code> and <code>Cta Bof</code> all work the same way.</div>
+</div>
+
+<!-- ── Step by step ───────────────────────────────────────────────────────── -->
+<h2>Step-by-step workflow</h2>
+<div class="steps">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <div class="step-title">📁 Pick your project folder</div>
+      <div class="step-desc">Click <strong>Project</strong> and select the root folder of your campaign. The plugin will auto-load optimised video files from <code>optimized-videos/</code> inside that folder.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <div class="step-title">↺ Scan the Figma page</div>
+      <div class="step-desc">Click <strong>Scan</strong>. The plugin reads the current page, finds all banner frames and sections, reads the Control Panel, and populates the UI.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <div class="step-title">✓ Select sizes to export</div>
+      <div class="step-desc">All found sizes are checked by default. Uncheck any you don't need. Use <strong>Unselect All / Select All</strong> to toggle quickly.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <div class="step-title">🎬 Load video files (if needed)</div>
+      <div class="step-desc">If your banners have a video layer, the <strong>Video Files</strong> panel appears after scanning. If a project folder is set and videos were found automatically, the buttons will already show the filenames in green. Otherwise pick each MP4 manually.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <div class="step-title">⚙ Review settings</div>
+      <div class="step-desc">Expand <strong>Settings</strong> to set the click URL, scene duration (ms), fade time (ms), vertical code and campaign date. These are used in the exported filename and banner behaviour.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-body">
+      <div class="step-title">▶ Click "Convert HTML5 Banners"</div>
+      <div class="step-desc">The export overlay opens. A progress bar and elapsed timer show you how far along the process is. You can click <strong>■ Stop</strong> at any time to cancel.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">7</div>
+    <div class="step-body">
+      <div class="step-title">⬇ Review the log and download</div>
+      <div class="step-desc">Read the export log for any warnings (missing videos, hidden layers). When satisfied, click <strong>⬇ Download ZIP</strong>. The master ZIP contains all banners organised by funnel and copy code, plus <code>preview.html</code> pages.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Video setup ────────────────────────────────────────────────────────── -->
+<h2>Video file setup</h2>
+<p>For the auto-load feature to work, organise your project folder like this:</p>
+<div class="callout info">
+  <span class="callout-icon">📂</span>
+  <div class="callout-body">
+    <strong>my-campaign/</strong><br>
+    &nbsp;&nbsp;optimized-videos/<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;casino/<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;casino-<strong>tof</strong>-optimized.mp4<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;casino-<strong>mof</strong>-optimized.mp4<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;casino-<strong>bof</strong>-optimized.mp4
+  </div>
+</div>
+<p>The subfolder name must match the vertical (e.g. <code>casino</code>, <code>sports</code>). Each file must contain <code>TOF</code>, <code>MOF</code> or <code>BOF</code> anywhere in its filename (case-insensitive).</p>
+
+<!-- ── Output filename ───────────────────────────────────────────────────── -->
+<h2>Output filename format</h2>
+<p>Every exported file is named using this structure:</p>
+<div class="filename">
+  <span class="fn-seg fn-brand">BA</span>
+  <span class="fn-sep">_</span>
+  <span class="fn-seg fn-year">2026</span>
+  <span class="fn-sep">_</span>
+  <span class="fn-seg fn-vertical">C</span>
+  <span class="fn-sep">_</span>
+  <span class="fn-seg fn-campaign">LNY</span>
+  <span class="fn-sep">_</span>
+  <span class="fn-seg fn-funnel">TOF</span>
+  <span class="fn-sep">_</span>
+  <span class="fn-seg fn-copy">LNY01</span>
+  <span class="fn-sep">_</span>
+  <span class="fn-seg fn-channel">DISPLAY</span>
+  <span class="fn-sep">_</span>
+  <span class="fn-seg fn-type">DYN</span>
+  <span class="fn-sep">_</span>
+  <span class="fn-seg fn-date">20260120</span>
+  <span class="fn-sep">_</span>
+  <span class="fn-seg fn-size">300x250</span>
+</div>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Segment</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>BA</td><td>Fixed — BetAnything brand prefix</td></tr>
+      <tr><td>2026</td><td>Extracted from the date field (Settings)</td></tr>
+      <tr><td>C</td><td>Vertical — from Control Panel <code>vertical</code> layer or Settings</td></tr>
+      <tr><td>LNY</td><td>Campaign — from Control Panel <code>campaign</code> layer or Settings</td></tr>
+      <tr><td>TOF</td><td>Funnel — from the Section name (e.g. <code>TOF_LNY01</code>)</td></tr>
+      <tr><td>LNY01</td><td>Copy code — from the Section name (e.g. <code>TOF_LNY01</code>)</td></tr>
+      <tr><td>DISPLAY</td><td>Fixed — channel</td></tr>
+      <tr><td>DYN</td><td>Fixed — dynamic type</td></tr>
+      <tr><td>20260120</td><td>Date — from Settings</td></tr>
+      <tr><td>300x250</td><td>Banner size</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── Figma template ─────────────────────────────────────────────────────── -->
+<div class="divider"></div>
+<h2>Resources</h2>
+<div class="cta-row">
+  <a class="btn-primary" href="https://www.figma.com/design/gYRWPQdgwNdUjgHhXnNHLv/Paid-Media-Wave-4?node-id=4008-10581&t=0SCLvSRj4K0Roi5Q-1" target="_blank">
+    ✦ Open Figma Template
+  </a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BA Banner Engine</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- macOS traffic light + draggable titlebar -->
+<div class="titlebar">
+  <span class="app-title">Banner Engine</span>
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="false"></div>
+  <span class="app-version">v2.0</span>
+</div>
+
+<div class="content">
+
+  <!-- ── Sheet URL ── -->
+  <section class="field-group">
+    <label class="field-label">Google Sheet</label>
+    <div class="input-row">
+      <input type="url" id="sheet-url" class="text-input next-step" placeholder="Paste Google Sheets link…" autocomplete="off" spellcheck="false">
+      <button id="fetch-btn" class="btn-secondary next-step">Fetch</button>
+    </div>
+  </section>
+
+  <!-- ── Folders ── -->
+  <div class="folders-row">
+    <section id="video-section" class="field-group">
+      <label class="field-label">Video folder</label>
+      <div class="input-row">
+        <input type="text" id="video-dir" class="text-input path-input" placeholder="No folder selected" readonly>
+        <button id="video-btn" class="btn-secondary">Browse…</button>
+      </div>
+    </section>
+
+    <section id="output-section" class="field-group">
+      <label class="field-label">Output folder</label>
+      <div class="input-row">
+        <input type="text" id="output-dir" class="text-input path-input" placeholder="No folder selected" readonly>
+        <button id="output-btn" class="btn-secondary">Browse…</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── Row checklist (hidden until fetched) ── -->
+  <section id="rows-section" class="hidden">
+    <div class="rows-header">
+      <span class="field-label">Preview window</span>
+      <span id="rows-summary" class="rows-summary-text"></span>
+      <div class="rows-actions">
+        <button id="select-all-btn" class="text-btn">Select all</button>
+        <span class="text-btn-sep">·</span>
+        <button id="deselect-all-btn" class="text-btn">Deselect all</button>
+      </div>
+    </div>
+    <div id="rows-list" class="rows-list"></div>
+  </section>
+
+  <!-- ── Generate button (hidden until rows loaded) ── -->
+  <section id="generate-section" class="hidden">
+    <button id="generate-btn" class="btn-generate" disabled>⚡ Generate</button>
+  </section>
+
+  <!-- ── Progress log (hidden until generation starts) ── -->
+  <section id="log-section" class="hidden">
+    <div class="log-header">
+      <span class="field-label">Output</span>
+      <button id="open-output-btn" class="text-btn hidden">Open in Finder ↗</button>
+    </div>
+    <div id="log" class="log"></div>
+  </section>
+
+</div><!-- /content -->
+
+<script src="renderer.js"></script>
+</body>
+</html>

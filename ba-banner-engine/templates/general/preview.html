@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BA Banner Preview – All Sizes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #3a3a3a;
+    font-family: Arial, sans-serif;
+    padding: 40px;
+    min-width: 1200px;
+  }
+
+  /* ── Header bar ── */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  h1 {
+    color: #aaa;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    flex: 1;
+  }
+
+  /* ── Timer chip ── */
+  #timer-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 20px;
+    padding: 5px 14px 5px 10px;
+    font-size: 12px;
+    color: #aaa;
+    letter-spacing: 0.04em;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  #timer-chip.running { border-color: #48ff80; color: #48ff80; }
+  #timer-chip.stopped { background: #1a1a1a; border-color: #555; color: #666; }
+
+  #timer-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #48ff80;
+    flex-shrink: 0;
+    animation: blink 1s ease-in-out infinite;
+  }
+  #timer-chip.stopped #timer-dot {
+    background: #555;
+    animation: none;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.2; }
+  }
+
+  /* ── Stopped toast ── */
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #15051d;
+    border: 1px solid #48ff80;
+    color: #48ff80;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    padding: 10px 24px;
+    border-radius: 40px;
+    opacity: 0;
+    transition: opacity 0.4s, transform 0.4s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── Restart button ── */
+  #restart-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px solid #555;
+    color: #888;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  #restart-btn:hover { border-color: #aaa; color: #ccc; }
+  #restart-btn.visible { display: flex; }
+
+  .grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ── Top row ─────────────────────────────────── */
+  .row-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  /* ── Bottom row: 728×90 tucked under 320×480, bottoms aligned with 300×600 ── */
+  /* slot label (11px) + gap (7px) + iframe (90px) = 108px total slot height   */
+  /* pull up by 108px so 728×90 bottom = 300×600 bottom (618px from grid top)  */
+  .row-bottom {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding-left: 500px; /* 160 + 20 + 300 + 20 — aligns with 320×480 left edge */
+    margin-top: -108px;
+  }
+
+  /* ── Right cluster: 300×250 + small banners ─── */
+  .cluster {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── Individual banner slot ────────────────── */
+  .slot {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .slot-label {
+    color: #888;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+
+  iframe {
+    display: block;
+    border: none;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>BA Banner Generator v2.0 — Template Preview</h1>
+
+  <!-- Timer chip -->
+  <div id="timer-chip" class="running">
+    <span id="timer-dot"></span>
+    <span id="timer-label">Animating — 0s</span>
+  </div>
+
+  <!-- Restart button (appears after stop) -->
+  <button id="restart-btn" onclick="restartAll()">↺ Restart</button>
+</div>
+
+<!-- Stopped toast -->
+<div id="toast">⏹ Banners stopped at 30s</div>
+
+<div class="grid">
+
+  <!-- ── ROW 1 ─────────────────────────────────── -->
+  <div class="row-top">
+
+    <!-- 160×600 -->
+    <div class="slot">
+      <span class="slot-label">160×600 Template</span>
+      <iframe src="160x600/160x600.html" width="160" height="600" scrolling="no"></iframe>
+    </div>
+
+    <!-- 300×600 -->
+    <div class="slot">
+      <span class="slot-label">300×600 Template</span>
+      <iframe src="300x600/300x600.html" width="300" height="600" scrolling="no"></iframe>
+    </div>
+
+    <!-- 320×480 -->
+    <div class="slot">
+      <span class="slot-label">320×480 Template</span>
+      <iframe src="320x480/320x480.html" width="320" height="480" scrolling="no"></iframe>
+    </div>
+
+    <!-- Right cluster -->
+    <div class="cluster">
+
+      <!-- 300×250 -->
+      <div class="slot">
+        <span class="slot-label">300×250 Template</span>
+        <iframe src="300x250/300x250.html" width="300" height="250" scrolling="no"></iframe>
+      </div>
+
+      <!-- 320×50 -->
+      <div class="slot">
+        <span class="slot-label">320×50 Template</span>
+        <iframe src="320x50/320x50.html" width="320" height="50" scrolling="no"></iframe>
+      </div>
+
+      <!-- 300×50 -->
+      <div class="slot">
+        <span class="slot-label">300×50 Template</span>
+        <iframe src="300x50/300x50.html" width="300" height="50" scrolling="no"></iframe>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ── ROW 2 ─────────────────────────────────── -->
+  <div class="row-bottom">
+
+    <!-- 728×90 -->
+    <div class="slot">
+      <span class="slot-label">728×90 Template</span>
+      <iframe src="728x90/728x90.html" width="728" height="90" scrolling="no"></iframe>
+    </div>
+
+  </div>
+
+</div><!-- /grid -->
+
+<script>
+  var start = Date.now();
+  var stopped = false;
+  var chip    = document.getElementById('timer-chip');
+  var label   = document.getElementById('timer-label');
+  var toast   = document.getElementById('toast');
+  var btn     = document.getElementById('restart-btn');
+
+  function tick() {
+    if (stopped) return;
+    var elapsed = Math.floor((Date.now() - start) / 1000);
+
+    if (elapsed >= 30) {
+      // Banners have frozen — update UI
+      stopped = true;
+      label.textContent = 'Stopped at 30s';
+      chip.className = 'stopped';
+
+      // Show toast
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 4000);
+
+      // Show restart button
+      btn.classList.add('visible');
+      return;
+    }
+
+    var remaining = 30 - elapsed;
+    label.textContent = 'Animating — ' + elapsed + 's  (' + remaining + 's left)';
+    setTimeout(tick, 250);
+  }
+
+  function restartAll() {
+    // Reload every iframe to reset animations
+    var frames = document.querySelectorAll('iframe');
+    frames.forEach(function(f) { f.src = f.src; });
+
+    // Reset timer state
+    start   = Date.now();
+    stopped = false;
+    chip.className = 'running';
+    label.textContent = 'Animating — 0s';
+    btn.classList.remove('visible');
+    toast.classList.remove('show');
+    tick();
+  }
+
+  tick();
+</script>
+</body>
+</html>

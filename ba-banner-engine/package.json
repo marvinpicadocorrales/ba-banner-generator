@@ -1,0 +1,12 @@
+{
+  "name": "ba-banner-engine",
+  "version": "1.0.0",
+  "description": "BA Banner Engine — automated HTML5 banner generator",
+  "main": "main.js",
+  "scripts": {
+    "start": "ELECTRON_RUN_AS_NODE= electron ."
+  },
+  "devDependencies": {
+    "electron": "^32.3.3"
+  }
+}

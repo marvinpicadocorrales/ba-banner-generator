@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BA Banner Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --bg:#0c0b1e;--bg-2:#131228;--bg-3:#1a1934;
+  --border:#252448;--border-hi:#3a3870;
+  --purple:#6d28d9;--purple-hi:#7c3aed;--purple-lt:#a78bfa;
+  --green:#4ade80;
+  --text:#eeeef8;--text-2:#8888b8;--text-3:#50507a;
+  --warn:#facc15;--error:#f87171;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column}
+/* ── Header ───────────────────────────────────────────────────────────────── */
+header{flex-shrink:0;background:linear-gradient(160deg,#1a1242 0%,var(--bg) 70%);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:relative}
+header::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--purple),transparent);opacity:.5}
+.hdr-brand{display:flex;flex-direction:column;gap:3px}
+.hdr-name{font-size:12px;font-weight:700;color:var(--text);letter-spacing:.02em}
+.hdr-sub{font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--purple-lt)}
+.hdr-ver{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--text-3);background:var(--bg-3);border:1px solid var(--border-hi);border-radius:3px;padding:2px 7px;align-self:flex-start}
+/* ── Panels & typography ──────────────────────────────────────────────────── */
+h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-2);margin-bottom:8px}
+.panel{padding:12px 14px;border-bottom:1px solid var(--border)}
+#sizes-list{display:flex;flex-wrap:wrap;gap:6px;min-height:28px}
+.size-chip{display:flex;align-items:center;gap:5px;background:var(--bg-2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;user-select:none}
+.size-chip input[type=checkbox]{accent-color:var(--purple-lt);cursor:pointer}
+.size-chip label{cursor:pointer;font-size:12px}
+.size-chip .badge{font-size:10px;color:var(--purple-lt)}
+.form-row{display:flex;align-items:center;margin-bottom:7px;gap:8px}
+.form-row:last-child{margin-bottom:0}
+.form-row label{flex:0 0 110px;color:var(--text-2);font-size:12px}
+.form-row input{flex:1;background:var(--bg-2);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:4px 7px;font-size:12px;outline:none;transition:border-color .15s}
+.form-row input:focus{border-color:var(--purple)}
+.form-row .hint{font-size:11px;color:var(--text-3);margin-left:4px}
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+#btn-row{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border)}
+#btn-scan,#btn-export{padding:7px 14px;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}
+#btn-scan{background:var(--bg-3);color:var(--text-2);border:1px solid var(--border-hi);transition:border-color .15s,color .15s}
+#btn-scan:hover{border-color:var(--purple-lt);color:var(--purple-lt)}
+#btn-export{background:var(--green);color:#111;flex:1}
+#btn-export:disabled{opacity:.4;cursor:not-allowed}
+/* ── Progress ─────────────────────────────────────────────────────────────── */
+#progress-bar-wrap{height:3px;background:var(--bg-2)}
+#progress-bar{height:3px;background:linear-gradient(90deg,var(--purple),var(--purple-lt));width:0;transition:width .3s}
+/* ── Log ──────────────────────────────────────────────────────────────────── */
+#log{flex:1;overflow-y:auto;padding:10px 14px;font-family:'SF Mono',Menlo,monospace;font-size:11px;line-height:1.7;background:#07071a;min-height:80px}
+.log-info{color:var(--text-3)}.log-ok{color:var(--green)}.log-warn{color:var(--warn)}.log-err{color:var(--error)}
+/* ── Downloads ────────────────────────────────────────────────────────────── */
+#downloads{padding:10px 14px;border-top:1px solid var(--border);display:none}
+#dl-list{display:flex;flex-direction:column;gap:6px;max-height:120px;overflow-y:auto}
+.dl-item{display:flex;align-items:center;gap:8px;background:var(--bg-2);border:1px solid var(--border);border-radius:5px;padding:6px 10px}
+.dl-name{flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dl-size{font-size:11px;color:var(--text-2);white-space:nowrap}
+.dl-item a{font-size:11px;color:var(--purple-lt);text-decoration:none;white-space:nowrap}
+/* ── Naming convention ────────────────────────────────────────────────────── */
+.nc-label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.nc-input{width:100%;background:var(--bg-2);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:4px 7px;font-size:12px;outline:none;box-sizing:border-box;transition:border-color .15s}
+.nc-input:focus{border-color:var(--purple)}
+select.nc-input{cursor:pointer}
+.nc-fixed{color:var(--text-3);cursor:default;background:var(--bg);border-color:var(--border)}
+/* ── Section chips ────────────────────────────────────────────────────────── */
+.sec-toggle-btn{background:transparent;border:1px solid var(--border-hi);color:var(--text-2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s}
+.sec-toggle-btn:hover{border-color:var(--purple-lt);color:var(--purple-lt)}
+#sections-panel{display:none}
+#sections-list{display:flex;flex-direction:column;gap:4px}
+.sec-chip{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:4px 8px;cursor:pointer;user-select:none}
+.sec-chip input[type=checkbox]{accent-color:var(--purple-lt);cursor:pointer;flex-shrink:0}
+.sec-chip label{cursor:pointer;font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec-chip .sec-sizes{font-size:10px;color:var(--text-3);white-space:nowrap}
+.funnel-badge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;white-space:nowrap;flex-shrink:0}
+.funnel-top{background:#831843;color:#fbcfe8}
+.funnel-mid{background:#1e3a5f;color:#93c5fd}
+.funnel-bot{background:#3b0764;color:#d8b4fe}
+.funnel-xx{background:#374151;color:#9ca3af}
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:2px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-brand">
+    <span class="hdr-name">BA Banner Generator</span>
+    <span class="hdr-sub">Display · Dynamic</span>
+  </div>
+  <span class="hdr-ver">v1.1</span>
+</header>
+
+<div id="sections-panel" class="panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <h3 style="margin-bottom:0">Sections (Copy Codes)</h3>
+    <button id="btn-sec-toggle" class="sec-toggle-btn">Unselect All</button>
+  </div>
+  <div id="sections-list"></div>
+  <div id="sections-info" style="font-size:11px;color:var(--text-3);margin-top:6px"></div>
+</div>
+
+<div class="panel">
+  <h3>Banner Sizes</h3>
+  <div id="sizes-list"><span style="color:#666;font-size:12px">Scanning…</span></div>
+</div>
+
+<div class="panel">
+  <h3>Settings</h3>
+  <div class="form-row">
+    <label>Click URL</label>
+    <input id="click-url" type="text" value="https://betanything.eu">
+  </div>
+  <div class="form-row">
+    <label>Scene duration</label>
+    <input id="scene-dur" type="number" value="2200" min="500" max="10000" style="width:70px;flex:none">
+    <span class="hint">ms per scene</span>
+  </div>
+  <div class="form-row">
+    <label>Fade time</label>
+    <input id="fade-time" type="number" value="400" min="100" max="2000" style="width:70px;flex:none">
+    <span class="hint">ms cross-dissolve</span>
+  </div>
+  <div class="form-row">
+    <label>Export scale</label>
+    <input id="scale" type="number" value="1" min="1" max="3" step="0.5" style="width:55px;flex:none">
+    <span class="hint">× (1 = 1:1px)</span>
+  </div>
+  <div class="form-row" id="video-file-row">
+    <label>Video (.mp4)</label>
+    <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+      <input id="video-file-input" type="file" accept=".mp4,video/mp4"
+        style="flex:1;font-size:11px;color:#d4d4d4;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:4px;padding:3px 6px;cursor:pointer">
+      <span id="video-file-hint" class="hint" style="font-size:10px">For banners with a video layer</span>
+    </div>
+  </div>
+</div>
+
+<div id="video-pickers-panel" class="panel" style="display:none">
+  <h3>Video Files</h3>
+  <div id="video-pickers-list"></div>
+  <div style="font-size:10px;color:#555;margin-top:5px">One .mp4 per section — same video for all sizes in that section.</div>
+</div>
+
+<div class="panel">
+  <h3>File Naming</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+    <div>
+      <div class="nc-label">Brand</div>
+      <input id="nc-brand" class="nc-input nc-fixed" value="BA" readonly tabindex="-1">
+    </div>
+    <div>
+      <div class="nc-label">Year</div>
+      <input id="nc-year" class="nc-input" value="2026" maxlength="4">
+    </div>
+    <div>
+      <div class="nc-label">Vertical</div>
+      <input id="nc-vertical" class="nc-input" value="C" maxlength="6">
+    </div>
+    <div>
+      <div class="nc-label">Campaign</div>
+      <input id="nc-campaign" class="nc-input" placeholder="e.g. W3" maxlength="10">
+    </div>
+    <div>
+      <div class="nc-label">Funnel</div>
+      <select id="nc-funnel" class="nc-input">
+        <option value="XX">— (n/a)</option>
+        <option value="TOP">TOP</option>
+        <option value="MID">MID</option>
+        <option value="BOT">BOT</option>
+      </select>
+    </div>
+    <div>
+      <div class="nc-label">CopyCode</div>
+      <input id="nc-copy" class="nc-input" placeholder="e.g. LNY01" maxlength="12">
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+    <div>
+      <div class="nc-label">Channel</div>
+      <input id="nc-channel" class="nc-input nc-fixed" value="DISPLAY" readonly tabindex="-1">
+    </div>
+    <div>
+      <div class="nc-label">Type</div>
+      <input id="nc-type" class="nc-input nc-fixed" value="DYN" readonly tabindex="-1">
+    </div>
+    <div>
+      <div class="nc-label">Date</div>
+      <input id="nc-date" class="nc-input" maxlength="8" placeholder="YYYYMMDD">
+    </div>
+  </div>
+  <div style="background:#07071a;border:1px solid #252448;border-radius:4px;padding:6px 8px">
+    <div class="nc-label" style="margin-bottom:3px">Preview</div>
+    <div id="nc-preview" style="font-family:'SF Mono',Menlo,monospace;font-size:10px;color:#a78bfa;word-break:break-all;line-height:1.5">—</div>
+  </div>
+</div>
+
+<div id="btn-row">
+  <button id="btn-scan">↺ Scan</button>
+  <button id="btn-export" disabled>Export Selected</button>
+</div>
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+<div id="log"><span class="log-info">Ready.</span></div>
+<div id="downloads">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <h3>Downloads</h3>
+    <button id="btn-dl-all" style="background:#4ade80;color:#111;border:none;border-radius:5px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;display:none">
+      ⬇ Download All (.zip)
+    </button>
+  </div>
+  <div id="dl-list"></div>
+</div>
+
+<script>
+var isExporting           = false;
+var allExportedBlobs      = []; // { filename, blob } — accumulates across export runs
+var currentSections       = []; // full section objects from last scan
+var lastExportHadSections = false;
+var selectedVideoBase64   = null; // default/fallback MP4 (single picker in Settings)
+var videosBySection       = {};   // per-section MP4s keyed by "FUNNEL|copyCode"
+
+function log(msg, type) {
+  var el  = document.getElementById('log');
+  var div = document.createElement('div');
+  div.className = 'log-' + (type || 'info');
+  div.textContent = msg;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+function setProgress(pct) { document.getElementById('progress-bar').style.width = pct + '%'; }
+
+function getSettings() {
+  return {
+    clickUrl:      document.getElementById('click-url').value.trim() || 'https://betanything.eu',
+    sceneDuration: parseInt(document.getElementById('scene-dur').value, 10) || 2200,
+    fadeTime:      parseInt(document.getElementById('fade-time').value, 10) || 400,
+    scale:         parseFloat(document.getElementById('scale').value) || 1,
+    videoFile:     'video.webm',
+    // ── Naming convention ──────────────────────────────────────────────────
+    ncBrand:    document.getElementById('nc-brand').value.trim()    || 'BA',
+    ncYear:     document.getElementById('nc-year').value.trim()     || 'YYYY',
+    ncVertical: document.getElementById('nc-vertical').value.trim() || 'X',
+    ncCampaign: document.getElementById('nc-campaign').value.trim() || 'XX',
+    ncFunnel:   document.getElementById('nc-funnel').value          || 'XX',
+    ncCopy:     document.getElementById('nc-copy').value.trim()     || 'XX',
+    ncChannel:  'DISPLAY',
+    ncType:     'DYN',
+    ncDate:     document.getElementById('nc-date').value.trim()     || 'YYYYMMDD',
+  };
+}
+
+// ── Build the canonical file/folder name for a given banner size ──────────────
+// e.g. BA_2026_C_W3_TOP_LNY01_DISPLAY_DYN_20260319_300x250
+// overrides: optional { funnel, copyCode } — from section data, takes precedence
+function verticalLabel(code) {
+  var map = { 'C':'Casino', 'S':'Sports', 'D':'Dual', 'CS':'Casino & Sports', 'SC':'Sports & Casino' };
+  return map[(code || '').toUpperCase()] || code || 'Display';
+}
+
+function buildCanonicalName(settings, spec, overrides) {
+  var funnel = (overrides && overrides.funnel)   ? overrides.funnel   : settings.ncFunnel;
+  var copy   = (overrides && overrides.copyCode) ? overrides.copyCode : settings.ncCopy;
+  return [
+    settings.ncBrand, settings.ncYear, settings.ncVertical, settings.ncCampaign,
+    funnel, copy, settings.ncChannel, settings.ncType,
+    settings.ncDate, spec
+  ].join('_');
+}
+
+function scan() {
+  log('Scanning page…', 'info');
+  parent.postMessage({ pluginMessage: { type: 'scan' } }, '*');
+}
+
+function renderBanners(banners) {
+  var list = document.getElementById('sizes-list');
+  list.innerHTML = '';
+  var keys = Object.keys(banners);
+  if (!keys.length) {
+    list.innerHTML = '<span style="color:#666;font-size:12px">No banner frames found.</span>';
+    document.getElementById('btn-export').disabled = true;
+    return;
+  }
+  keys.forEach(function(key) {
+    var n    = banners[key].frameCount;
+    var chip = document.createElement('div');
+    chip.className = 'size-chip';
+    chip.innerHTML =
+      '<input type="checkbox" id="cb-' + key + '" value="' + key + '" checked>' +
+      '<label for="cb-' + key + '">' + key + '</label>' +
+      '<span class="badge">' + n + 's</span>';
+    list.appendChild(chip);
+  });
+  document.getElementById('btn-export').disabled = false;
+  log('Found ' + keys.length + ' size(s): ' + keys.join(', '), 'ok');
+}
+
+// ── CSS class for funnel color badge ─────────────────────────────────────────
+function funnelClass(funnel) {
+  var f = (funnel || '').toUpperCase();
+  if (f === 'TOP') return 'funnel-top';
+  if (f === 'MID') return 'funnel-mid';
+  if (f === 'BOT') return 'funnel-bot';
+  return 'funnel-xx';
+}
+
+// ── Render sections panel ─────────────────────────────────────────────────────
+function renderSections(sections) {
+  var panel = document.getElementById('sections-panel');
+  var list  = document.getElementById('sections-list');
+  list.innerHTML = '';
+
+  if (!sections || !sections.length) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = 'block';
+
+  sections.forEach(function(sec, idx) {
+    var sizeCount = sec.sizeCount || 0;
+    var chip      = document.createElement('div');
+    chip.className = 'sec-chip';
+    chip.innerHTML =
+      '<input type="checkbox" id="sec-cb-' + idx + '" value="' + idx + '" checked>' +
+      '<span class="funnel-badge ' + funnelClass(sec.funnel) + '">' + (sec.funnel || 'XX') + '</span>' +
+      '<label for="sec-cb-' + idx + '">' + sec.copyCode + '</label>' +
+      '<span class="sec-sizes">' + sizeCount + ' size(s)</span>';
+    list.appendChild(chip);
+    chip.querySelector('input').addEventListener('change', updateSecToggleBtn);
+  });
+
+  document.getElementById('sections-info').textContent =
+    sections.length + ' section(s) — each exports its own set of ZIPs.';
+  updateSecToggleBtn();
+}
+
+function updateSecToggleBtn() {
+  var cbs  = document.querySelectorAll('#sections-list input[type=checkbox]');
+  var btn  = document.getElementById('btn-sec-toggle');
+  if (!cbs.length || !btn) return;
+  var allChecked = Array.from(cbs).every(function(cb) { return cb.checked; });
+  btn.textContent = allChecked ? 'Unselect All' : 'Select All';
+}
+
+document.getElementById('btn-sec-toggle').addEventListener('click', function() {
+  var cbs      = document.querySelectorAll('#sections-list input[type=checkbox]');
+  var allChecked = Array.from(cbs).every(function(cb) { return cb.checked; });
+  cbs.forEach(function(cb) { cb.checked = !allChecked; });
+  updateSecToggleBtn();
+});
+
+// ── Per-section video file pickers ───────────────────────────────────────────
+function renderVideoPickers(sections) {
+  var panel = document.getElementById('video-pickers-panel');
+  var list  = document.getElementById('video-pickers-list');
+  list.innerHTML = '';
+  videosBySection = {}; // reset on each scan
+
+  // When sections exist, per-funnel pickers take over — hide the global fallback
+  document.getElementById('video-file-row').style.display = sections && sections.length ? 'none' : 'flex';
+
+  if (!sections || !sections.length) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'block';
+
+  // Deduplicate: one picker per unique funnel (all copy codes in a funnel share the same video)
+  var seenFunnels = {};
+  sections.forEach(function(sec) {
+    var funnel = sec.funnel || 'XX';
+    if (seenFunnels[funnel]) return; // already rendered
+    seenFunnels[funnel] = true;
+
+    var key = funnel; // keyed by funnel only
+
+    var row = document.createElement('div');
+    row.className = 'form-row';
+
+    var lbl = document.createElement('label');
+    lbl.style.cssText = 'flex:0 0 110px;color:#999;font-size:12px';
+    lbl.textContent = funnel;
+
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:3px';
+
+    var inp = document.createElement('input');
+    inp.type    = 'file';
+    inp.accept  = '.mp4,video/mp4';
+    inp.style.cssText = 'font-size:11px;color:#d4d4d4;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:4px;padding:3px 6px;cursor:pointer;width:100%';
+
+    var hint = document.createElement('span');
+    hint.className = 'hint';
+    hint.style.fontSize = '10px';
+    hint.textContent = '.mp4 for this section';
+
+    inp.addEventListener('change', (function(k, h) {
+      return function(e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) { delete videosBySection[k]; h.textContent = '.mp4 for this section'; h.style.color = ''; return; }
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+          var raw = ev.target.result, ci = raw.indexOf(',');
+          videosBySection[k] = ci >= 0 ? raw.slice(ci + 1) : raw;
+          h.textContent = '✓ ' + file.name;
+          h.style.color = '#4ade80';
+          log('Video loaded for funnel ' + k + ': ' + file.name + ' (' + formatSize(file.size) + ')', 'ok');
+        };
+        reader.readAsDataURL(file);
+      };
+    })(key, hint));
+
+    wrap.appendChild(inp);
+    wrap.appendChild(hint);
+    row.appendChild(lbl);
+    row.appendChild(wrap);
+    list.appendChild(row);
+  });
+}
+
+// ── Unified scan-result handler ───────────────────────────────────────────────
+// msg uses flat parallel arrays (no nested objects/arrays) to avoid Figma's
+// deepUnwrap recursion abort. Reconstruct typed objects here in the UI.
+function renderScanResult(msg) {
+  // Rebuild banners object: { [sizeKey]: { frameCount: N } }
+  var banners = {};
+  var bKeys   = msg.bannerKeys   || [];
+  var bCounts = msg.bannerCounts || [];
+  for (var bi = 0; bi < bKeys.length; bi++) {
+    banners[bKeys[bi]] = { frameCount: bCounts[bi] };
+  }
+
+  // Rebuild sections array: [{ id, name, funnel, copyCode, sizeCount }]
+  var sections = [];
+  var sIds     = msg.sectionIds        || [];
+  var sNames   = msg.sectionNames      || [];
+  var sFuns    = msg.sectionFunnels    || [];
+  var sCodes   = msg.sectionCopyCodes  || [];
+  var sCounts  = msg.sectionSizeCounts || [];
+  for (var si = 0; si < sIds.length; si++) {
+    sections.push({
+      id:        sIds[si],
+      name:      sNames[si],
+      funnel:    sFuns[si],
+      copyCode:  sCodes[si],
+      sizeCount: sCounts[si],
+    });
+  }
+
+  currentSections = sections;
+  renderBanners(banners);
+  renderSections(currentSections);
+  renderVideoPickers(currentSections);
+  if (msg.hasSections) {
+    log('Found ' + currentSections.length + ' section(s) · ' +
+        bKeys.length + ' size(s).', 'ok');
+  }
+}
+
+// ── Video file picker ─────────────────────────────────────────────────────────
+document.getElementById('video-file-input').addEventListener('change', function(e) {
+  var file = e.target.files && e.target.files[0];
+  if (!file) { selectedVideoBase64 = null; return; }
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    // ev.target.result = "data:video/mp4;base64,AAAA…" — strip the prefix
+    var dataUrl = ev.target.result;
+    var commaIdx = dataUrl.indexOf(',');
+    selectedVideoBase64 = commaIdx >= 0 ? dataUrl.slice(commaIdx + 1) : dataUrl;
+    log('Video file loaded: ' + file.name + ' (' + formatSize(file.size) + ')', 'ok');
+    document.getElementById('video-file-hint').textContent = '✓ ' + file.name;
+    document.getElementById('video-file-hint').style.color = '#4ade80';
+  };
+  reader.onerror = function() {
+    selectedVideoBase64 = null;
+    log('Failed to read video file.', 'err');
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('btn-scan').addEventListener('click', scan);
+
+document.getElementById('btn-export').addEventListener('click', function() {
+  if (isExporting) return;
+  var selected = Array.from(document.querySelectorAll('#sizes-list input:checked')).map(function(cb){ return cb.value; });
+  if (!selected.length) { log('No sizes selected.', 'warn'); return; }
+
+  // Collect checked sections (if any sections exist)
+  var selectedSections = null;
+  var secCbs = document.querySelectorAll('#sections-list input:checked');
+  if (currentSections.length > 0 && secCbs.length > 0) {
+    selectedSections = [];
+    secCbs.forEach(function(cb) {
+      var idx = parseInt(cb.value, 10);
+      if (currentSections[idx]) selectedSections.push(currentSections[idx]);
+    });
+  }
+
+  isExporting = true;
+  lastExportHadSections = !!(selectedSections && selectedSections.length);
+  document.getElementById('btn-export').disabled = true;
+  document.getElementById('downloads').style.display = 'none';
+  document.getElementById('btn-dl-all').style.display = 'none';
+  document.getElementById('log').innerHTML = '';
+  allExportedBlobs = [];
+  setProgress(5);
+
+  if (selectedSections && selectedSections.length) {
+    log('Exporting ' + selectedSections.length + ' section(s) × ' + selected.length + ' size(s)…', 'info');
+  } else {
+    log('Exporting ' + selected.join(', ') + '…', 'info');
+  }
+
+  parent.postMessage({ pluginMessage: {
+    type:             'export',
+    selectedSizes:    selected,
+    selectedSections: selectedSections,
+    settings:         getSettings(),
+  }}, '*');
+});
+
+// ── Base64 helper ─────────────────────────────────────────────────────────────
+function toBase64(arr) {
+  var uint8 = arr instanceof Uint8Array ? arr : new Uint8Array(arr);
+  var bin = '', chunk = 8192;
+  for (var i = 0; i < uint8.length; i += chunk) {
+    bin += String.fromCharCode.apply(null, uint8.subarray(i, i + chunk));
+  }
+  return btoa(bin);
+}
+
+// ── Generate banner HTML ──────────────────────────────────────────────────────
+//
+// mode: 'layered'
+//   layers[]  = array of layer objects in z-order (bottom → top):
+//     Static layer:  { isStatic:true, x, y, w, h, png, role, subRole, zIndex }
+//     Scene layer:   { isStatic:false, scenes:[{scene,x,y,w,h,png}], role, zIndex }
+//
+// Each layer → its own <div> at its exact (x,y,w,h) position.
+// Scene layers use .sc .sc-N classes for cross-fade.
+// static-ui logo → no animation.
+// static-ui cta  → ctaPulse animation.
+//
+function generateBannerHTML(result, settings, overrides) {
+  var W              = result.W;
+  var H              = result.H;
+  var bgColor        = result.bgColor;
+  var clickUrl       = settings.clickUrl;
+  var dwell          = settings.sceneDuration;
+  var fade           = settings.fadeTime;
+  var N              = result.sceneCount;
+  var vl             = result.videoLayer || null;
+  var videoInsertIdx = (vl && result.videoInsertIdx !== null) ? result.videoInsertIdx : -1;
+  var videoInserted  = false;
+
+  // Video scene indices baked in — used by makeVideoTag and the generated JS.
+  // The video is NOT part of the .sc system (adding an element to multiple .sc-N groups
+  // causes the remove() in the leaving group to override the add() from the arriving group).
+  // Instead, opacity is controlled directly in nx() via style.opacity.
+  var videoSceneIdxArr = (vl && result.videoSceneIndices && result.videoSceneIndices.length)
+    ? result.videoSceneIndices : [];
+
+  function makeVideoTag(zIdx) {
+    // Initial opacity: visible if scene 0 is in the list (or list is empty = always visible)
+    var initialOpacity = (!videoSceneIdxArr.length || videoSceneIdxArr.indexOf(0) >= 0) ? '1' : '0';
+    var dataAttr = videoSceneIdxArr.length ? ' data-scenes="' + videoSceneIdxArr.join(',') + '"' : '';
+    var style = 'position:absolute;left:' + vl.x + 'px;top:' + vl.y + 'px;' +
+                'width:' + vl.w + 'px;height:' + vl.h + 'px;z-index:' + zIdx + ';' +
+                'opacity:' + initialOpacity + ';' +
+                'transition:opacity ' + fade + 'ms ease-in-out;' +
+                'object-fit:cover;object-position:center;overflow:hidden;pointer-events:none';
+    return '<video' + dataAttr + ' autoplay muted loop playsinline poster="images/video_poster.png" ' +
+           'style="' + style + '">' +
+           '<source src="videos/' + vl.videoFilename + '" type="video/mp4"><\/video>\n';
+  }
+
+  var divs = '';
+  var hasDataLayers = false; // set true if any fuzzy-persistent layer is emitted
+
+  // Pre-pass: find the highest z-index among all animated (non-static) scene layers.
+  // Gradient/overlay layers sit below copy text in z-order, so any layer with
+  // z < maxSceneZ is treated as a gradient candidate → gets sc-g instant-cut class.
+  var maxSceneZ = 0;
+  for (var _pi = 0; _pi < result.layers.length; _pi++) {
+    var _pl = result.layers[_pi];
+    if (!_pl.isStatic && _pl.scenes && _pl.scenes.length > 0) {
+      if (_pl.zIndex > maxSceneZ) maxSceneZ = _pl.zIndex;
+    }
+  }
+
+  for (var li = 0; li < result.layers.length; li++) {
+    // Insert <video> tag at the correct z-position (between layers)
+    if (!videoInserted && videoInsertIdx >= 0 && li === videoInsertIdx) {
+      divs += makeVideoTag(videoInsertIdx + 1);
+      videoInserted = true;
+    }
+
+    var layer = result.layers[li];
+    var z     = layer.zIndex;
+
+    // ── Fuzzy-persistent upgrade ──────────────────────────────────────────────
+    // If all scene exports of a layer share nearly the same position+size (≤6px
+    // drift), it is the same Figma content with per-frame rendering noise (e.g.
+    // a gradient overlay whose glow overflow varies by 1-2 px per frame).
+    //
+    // Two sub-cases:
+    //  a) Layer is present in ALL N scenes → promote to fully static (always visible).
+    //  b) Layer is present in SOME scenes → render ONE div with data-layers="0,2,…"
+    //     and manage opacity in nx() via setLy(). This keeps it visible across
+    //     consecutive scenes that share the same gradient without any cross-fade
+    //     flicker, while still hiding it in scenes where it doesn't belong.
+    var _skipNormal = false;
+    if (!layer.isStatic && layer.scenes && layer.scenes.length > 1) {
+      var _xs = layer.scenes.map(function(s){return s.x;});
+      var _ys = layer.scenes.map(function(s){return s.y;});
+      var _ws = layer.scenes.map(function(s){return s.w;});
+      var _hs = layer.scenes.map(function(s){return s.h;});
+      var _drift = Math.max(
+        Math.max.apply(null,_xs) - Math.min.apply(null,_xs),
+        Math.max.apply(null,_ys) - Math.min.apply(null,_ys),
+        Math.max.apply(null,_ws) - Math.min.apply(null,_ws),
+        Math.max.apply(null,_hs) - Math.min.apply(null,_hs)
+      );
+      if (_drift <= 6) {
+        // Also verify PNGs actually match — full-frame exports have drift=0 but
+        // completely different content per scene and must NOT be promoted to static.
+        var _p0 = layer.scenes[0].png;
+        var _pngsSame = layer.scenes.every(function(s){ return s.png === _p0; });
+        var _scNums = layer.scenes.map(function(s){return s.scene;}).sort(function(a,b){return a-b;});
+        if (_scNums.length === N && _pngsSame) {
+          // (a) Covers ALL scenes AND pixels are identical → fully static, always visible
+          layer.isStatic = true;
+          layer.png = layer.scenes[0].png;
+          layer.x   = layer.scenes[0].x;
+          layer.y   = layer.scenes[0].y;
+          layer.w   = layer.scenes[0].w;
+          layer.h   = layer.scenes[0].h;
+        } else if (_scNums.length !== N) {
+          // (b) Covers SOME (not all) scenes → single div, opacity managed by setLy()
+          // Note: if it covers ALL scenes but with different content (e.g. full-frame
+          // exports always at 0,0,W,H), fall through to normal sc-N scene rendering.
+          var _s0      = layer.scenes[0];
+          var _initOp  = (_scNums.indexOf(0) >= 0) ? '1' : '0';
+          // Gradient layers (z < maxSceneZ) cut instantly — prevents video cuts showing through.
+          // Non-gradient layers keep a normal cross-fade.
+          var _dlTrans = (z < maxSceneZ) ? 'none' : ('opacity ' + fade + 'ms ease-in-out');
+          var _dlStyle = 'position:absolute;left:' + _s0.x + 'px;top:' + _s0.y + 'px;' +
+                         'width:' + _s0.w + 'px;height:' + _s0.h + 'px;z-index:' + z + ';' +
+                         'opacity:' + _initOp + ';transition:' + _dlTrans + ';' +
+                         'pointer-events:none';
+          divs += '<div data-layers="' + _scNums.join(',') + '" style="' + _dlStyle + '">' +
+                  '<img src="data:image/png;base64,' + _s0.png + '" ' +
+                  'style="width:' + _s0.w + 'px;height:' + _s0.h + 'px;display:block" alt=""></div>\n';
+          hasDataLayers = true;
+          _skipNormal   = true;
+        }
+      }
+    }
+
+    if (_skipNormal) { /* data-layers div already emitted above */ } else
+    if (layer.isStatic) {
+      // ── Always-visible div ────────────────────────────────────────────────
+      // layer.png is already a base64 string (encoded in plugin sandbox)
+      var src   = 'data:image/png;base64,' + layer.png;
+      var style = 'position:absolute;left:' + layer.x + 'px;top:' + layer.y + 'px;' +
+                  'width:' + layer.w + 'px;height:' + layer.h + 'px;' +
+                  'z-index:' + z + ';pointer-events:none';
+      var cls   = (layer.role === 'static-ui' && layer.subRole === 'cta') ? ' class="cta-layer"' : '';
+
+      divs += '<div' + cls + ' style="' + style + '">' +
+              '<img src="' + src + '" ' +
+              'style="width:' + layer.w + 'px;height:' + layer.h + 'px;display:block" alt=""></div>\n';
+
+    } else {
+      // ── Scene-specific: one div per scene, cross-fade ─────────────────────
+      // Smart position anchoring:
+      //   ≤2px difference from scene-0 → snap to scene-0 (kills Figma effect/glow
+      //   rounding jitter that causes a visible jump during cross-fades).
+      //   >2px difference → use own position (intentional design: e.g. last-frame
+      //   copy is vertically centred at a different y than scene 1).
+      // Always use each scene's OWN dimensions (s.w, s.h) to avoid clipping.
+      var ref = layer.scenes[0];
+      for (var si = 0; si < layer.scenes.length; si++) {
+        var s     = layer.scenes[si];
+        var src   = 'data:image/png;base64,' + s.png;
+        var on    = (s.scene === 0) ? ' on' : ''; // use scene INDEX, not array position
+        var posX  = (Math.abs(s.x - ref.x) <= 2) ? ref.x : s.x;
+        var posY  = (Math.abs(s.y - ref.y) <= 2) ? ref.y : s.y;
+        var style = 'position:absolute;left:' + posX + 'px;top:' + posY + 'px;' +
+                    'width:' + s.w + 'px;height:' + s.h + 'px;z-index:' + z;
+        // sc-g marks gradient/overlay layers (z < maxSceneZ) for instant opacity cuts
+        // so they always cover video layer transitions without any fade gap.
+        var scgCls = (z < maxSceneZ) ? ' sc-g' : '';
+
+        divs += '<div class="sc sc-' + s.scene + on + scgCls + '" style="' + style + '">' +
+                '<img src="' + src + '" ' +
+                'style="width:' + s.w + 'px;height:' + s.h + 'px;display:block" alt=""></div>\n';
+      }
+    }
+  }
+
+  // If video is above all other layers, insert it after the loop
+  if (!videoInserted && vl) {
+    divs += makeVideoTag(videoInsertIdx + 1);
+  }
+
+  var css =
+    '*{margin:0;padding:0;box-sizing:border-box}\n' +
+    'html,body{width:' + W + 'px;height:' + H + 'px;overflow:hidden;background:' + bgColor + '}\n' +
+    '@keyframes bIn{from{opacity:0}to{opacity:1}}\n' +
+    '#b{position:relative;width:' + W + 'px;height:' + H + 'px;overflow:hidden;cursor:pointer;' +
+        'animation:bIn ' + fade + 'ms ease forwards}\n' +
+    '.sc{position:absolute;opacity:0;transition:opacity ' + fade + 'ms ease-in-out}\n' +
+    '.sc.on{opacity:1}\n' +
+    '.sc-g{transition:none!important}\n' +
+    '.border{position:absolute;inset:0;border:1px solid rgba(0,0,0,.15);pointer-events:none;z-index:999}\n' +
+    '@keyframes ctaPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}\n' +
+    '.cta-layer{animation:ctaPulse 2s ease-in-out infinite;transform-origin:center bottom}\n';
+
+  // Video opacity JS — only emitted when a video layer with known scenes exists
+  var videoJS = (vl && videoSceneIdxArr.length)
+    ? '  var vid=document.querySelector(\'video[data-scenes]\');\n' +
+      '  var vsc=[' + videoSceneIdxArr.join(',') + '];\n' +
+      '  function setVid(s){if(vid)vid.style.opacity=vsc.indexOf(s)>=0?\'1\':\'0\';}\n'
+    : '';
+
+  // Fuzzy-persistent layer JS — manages opacity of data-layers divs (gradient overlays
+  // that appear in only some scenes but should NOT cross-fade when transitioning between
+  // consecutive scenes that share the same gradient content).
+  // setLy(s) is called at the START of each transition (when outgoing starts fading),
+  // so the gradient's opacity updates in sync with the outgoing scene, not delayed.
+  var layerJS = hasDataLayers
+    ? '  var lyEls=document.querySelectorAll(\'[data-layers]\');\n' +
+      '  function setLy(s){lyEls.forEach(function(el){\n' +
+      '    var sc=el.dataset.layers.split(\',\').map(Number);\n' +
+      '    el.style.opacity=sc.indexOf(s)>=0?\'1\':\'0\';\n' +
+      '  });}\n'
+    : '';
+
+  var js =
+    '(function(){\n' +
+    '  var N=' + N + ',groups=[],c=0;\n' +
+    '  for(var i=0;i<N;i++) groups.push(document.querySelectorAll(\'.sc-\'+i));\n' +
+    '  if(!groups[0]||!groups[0].length) return;\n' +
+    // N=1: single-frame banner — nothing to animate, skip the loop entirely.
+    '  if(N===1) return;\n' +
+    '  var dwell=' + dwell + ',fade=' + fade + ';\n' +
+    videoJS +
+    layerJS +
+    '  setTimeout(nx,dwell);\n' +
+    '  function nx(){\n' +
+    '    var p=c; c=(c+1)%N;\n' +
+    // ── Gradient layers (sc-g): instant cut at t=0, both ways atomically ──────
+    // This keeps the gradient coverage uninterrupted so video layer never shows
+    // through. No cross-fade — old gradient disappears and new one appears in
+    // the same JS frame, zero gap.
+    '    document.querySelectorAll(\'.sc-g.sc-\'+p).forEach(function(el){el.classList.remove(\'on\');});\n' +
+    '    document.querySelectorAll(\'.sc-g.sc-\'+c).forEach(function(el){el.classList.add(\'on\');});\n' +
+    // ── Video: sync at t=0 with gradient swap ─────────────────────────────────
+    // setVid fires immediately so the video starts its fade together with the
+    // outgoing scene — gradients always cover the video cut.
+    (vl && videoSceneIdxArr.length ? '    setVid(c);\n' : '') +
+    // ── data-layers (fuzzy-persistent gradient divs): also fire at t=0 ────────
+    // Gradient data-layers have transition:none so they cut instantly.
+    (hasDataLayers ? '    setLy(c);\n' : '') +
+    // ── Copy text (non-gradient .sc): sequential fade ─────────────────────────
+    // Outgoing copy starts fading at t=0 (cross-fade start).
+    // Incoming copy appears after outgoing has finished fading (t=fade),
+    // so the two copies never overlap.
+    '    document.querySelectorAll(\'.sc-\'+p+\':not(.sc-g)\').forEach(function(el){el.classList.remove(\'on\');});\n' +
+    '    (function(cur){\n' +
+    '      setTimeout(function(){\n' +
+    '        document.querySelectorAll(\'.sc-\'+cur+\':not(.sc-g)\').forEach(function(el){el.classList.add(\'on\');});\n' +
+    '      },fade);\n' +
+    '    })(c);\n' +
+    '    setTimeout(nx,dwell+fade*2);\n' +
+    '  }\n' +
+    '  document.getElementById(\'b\').addEventListener(\'click\',function(){\n' +
+    '    window.open(\'' + clickUrl + '\',\'_blank\');\n' +
+    '  });\n' +
+    '})();\n';
+
+  var bannerTitle = buildCanonicalName(settings, W + 'x' + H, overrides);
+  return '<!DOCTYPE html>\n' +
+    '<html lang="en">\n<head>\n' +
+    '<meta charset="utf-8">\n' +
+    '<meta http-equiv="X-UA-Compatible" content="IE=edge">\n' +
+    '<meta name="ad.size" content="width=' + W + ',height=' + H + '">\n' +
+    '<title>' + verticalLabel(settings.ncVertical) + '</title>\n' +
+    '<style>\n' + css + '</style>\n' +
+    '</head>\n<body>\n<div id="b">\n' +
+    divs +
+    '<div class="border"></div>\n' +
+    '</div>\n<script>\n' + js + '<\/script>\n' +
+    '</body>\n</html>';
+}
+
+// ── Generate per-size ZIP ─────────────────────────────────────────────────────
+async function buildZip(result, settings, overrides) {
+  var canonicalName = buildCanonicalName(settings, result.sizeKey, overrides);
+  var zip    = new JSZip();
+  var folder = zip.folder(canonicalName);
+
+  folder.file('index.html', generateBannerHTML(result, settings, overrides));
+
+  // Save video files if present
+  if (result.videoLayer) {
+    if (result.videoLayer.posterPng) {
+      folder.file('images/video_poster.png', result.videoLayer.posterPng, { base64: true });
+    }
+    // videoBase64: Figma API (future) → per-funnel picker → default picker → null
+    var sectionKey = overrides ? (overrides.funnel || 'XX') : '';
+    var mp4Base64  = result.videoLayer.videoBase64
+      || (sectionKey ? (videosBySection[sectionKey] || null) : null)
+      || selectedVideoBase64
+      || null;
+    if (mp4Base64) {
+      folder.file('videos/' + result.videoLayer.videoFilename, mp4Base64, { base64: true });
+    }
+  }
+
+  // Save reference PNG assets (useful for QA / debugging)
+  // layer.png / s.png are base64 strings — use JSZip's native base64 mode
+  result.layers.forEach(function(layer) {
+    var safeName = layer.name.replace(/[^\w\-]/g, '_');
+    if (layer.isStatic) {
+      folder.file('assets/' + safeName + '.png', layer.png, { base64: true });
+    } else {
+      layer.scenes.forEach(function(s) {
+        var pad = s.scene < 9 ? '0' : '';
+        folder.file('assets/' + safeName + '_scene_' + pad + (s.scene + 1) + '.png', s.png, { base64: true });
+      });
+    }
+  });
+
+  // layout.json — layer manifest for QA tools
+  folder.file('layout.json', JSON.stringify({
+    size:       result.sizeKey,
+    W:          result.W,
+    H:          result.H,
+    mode:       'layered',
+    sceneCount: result.sceneCount,
+    hasVideo:   !!(result.videoLayer),
+    videoLayer: result.videoLayer ? {
+      x: result.videoLayer.x, y: result.videoLayer.y,
+      w: result.videoLayer.w, h: result.videoLayer.h,
+      filename: result.videoLayer.videoFilename,
+    } : null,
+    layers: result.layers.map(function(l) {
+      return {
+        name:     l.name,
+        role:     l.role,
+        subRole:  l.subRole || null,
+        isStatic: l.isStatic,
+        zIndex:   l.zIndex,
+        x:        l.isStatic ? l.x : null,
+        y:        l.isStatic ? l.y : null,
+        w:        l.isStatic ? l.w : null,
+        h:        l.isStatic ? l.h : null,
+      };
+    }),
+  }, null, 2));
+
+  return await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(2) + ' MB';
+}
+
+// ── Handle export-complete ────────────────────────────────────────────────────
+async function handleExportComplete(results, settings, errors) {
+  var total = results.length, done = 0;
+  log('\nPackaging ' + total + ' banner(s)…', 'info');
+
+  // Warn about any result with a video layer that has no MP4 resolved
+  results.forEach(function(r) {
+    if (!r.videoLayer) return;
+    var sk = r.funnel || 'XX';
+    var hasVideo = r.videoLayer.videoBase64
+      || videosBySection[sk]
+      || selectedVideoBase64;
+    if (!hasVideo) {
+      var label = sk !== 'XX' ? 'funnel ' + sk : r.sizeKey;
+      log('⚠ No .mp4 for ' + label + ' — select a file in the Video Files panel or Settings.', 'warn');
+    }
+  });
+
+  var dlList = document.getElementById('dl-list');
+  dlList.innerHTML = '';
+
+  for (var ri = 0; ri < results.length; ri++) {
+    var result = results[ri];
+    // Per-result overrides from section export
+    var overrides = (result.funnel || result.copyCode) ? {
+      funnel:   result.funnel   || null,
+      copyCode: result.copyCode || null,
+    } : null;
+
+    try {
+      setProgress(10 + (done / total) * 80);
+      var label = result.sectionName ? result.sectionName + ' / ' + result.sizeKey : result.sizeKey;
+      log('  Building ZIP for ' + label + '…', 'info');
+      var blob     = await buildZip(result, settings, overrides);
+      var url      = URL.createObjectURL(blob);
+      var filename = buildCanonicalName(settings, result.sizeKey, overrides) + '.zip';
+
+      // Keep a reference for "Download All"
+      allExportedBlobs.push({ filename: filename, blob: blob });
+
+      var item = document.createElement('div');
+      item.className = 'dl-item';
+      item.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">' +
+          '<path d="M7 1v8M4 7l3 3 3-3" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"/>' +
+          '<path d="M1 11h12" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"/>' +
+        '</svg>' +
+        '<div class="dl-name">' + filename + '</div>' +
+        '<div class="dl-size">' + formatSize(blob.size) + '</div>' +
+        '<a href="' + url + '" download="' + filename + '">Download</a>';
+      dlList.appendChild(item);
+
+      log('  ✓ ' + label + ' (' + result.sceneCount + ' scenes, ' + formatSize(blob.size) + ')', 'ok');
+      done++;
+    } catch (e) {
+      var errLabel = result.sectionName ? result.sectionName + ' / ' + result.sizeKey : result.sizeKey;
+      log('  ✕ ' + errLabel + ': ' + e.message, 'err');
+    }
+  }
+
+  if (errors && errors.length) {
+    errors.forEach(function(e) { log('  ! ' + e, 'warn'); });
+  }
+
+  setProgress(100);
+  log('\nDone! ' + done + '/' + total + ' banner(s) ready.', 'ok');
+  if (done > 0) {
+    document.getElementById('downloads').style.display = 'block';
+    document.getElementById('btn-dl-all').style.display = done > 1 ? 'block' : 'none';
+  }
+
+  isExporting = false;
+  document.getElementById('btn-export').disabled = false;
+}
+
+// ── Message listener ──────────────────────────────────────────────────────────
+window.addEventListener('message', async function(ev) {
+  var msg = ev.data.pluginMessage;
+  if (!msg) return;
+  switch (msg.type) {
+    case 'scan-result':    renderScanResult(msg); break;
+    case 'progress':       log(msg.message, 'info'); break;
+    case 'warning':        log(msg.message, 'warn'); break;
+    case 'error':          log(msg.message, 'err');  break;
+    case 'export-complete': await handleExportComplete(msg.results, msg.settings, msg.errors); break;
+  }
+});
+
+// ── Download All handler ──────────────────────────────────────────────────────
+document.getElementById('btn-dl-all').addEventListener('click', async function() {
+  if (!allExportedBlobs.length) return;
+  var btn = this;
+  btn.textContent = 'Packing…';
+  btn.disabled = true;
+
+  var master = new JSZip();
+  for (var i = 0; i < allExportedBlobs.length; i++) {
+    var entry = allExportedBlobs[i];
+    var arrBuf = await entry.blob.arrayBuffer();
+    master.file(entry.filename, arrBuf);
+  }
+
+  var s = getSettings();
+  // When sections were exported the ZIPs inside have individual funnel+copy names.
+  // Use MULTI as a clear signal that this master ZIP spans multiple copy codes.
+  var masterOverrides = lastExportHadSections ? { funnel: 'MULTI', copyCode: 'MULTI' } : null;
+  var masterName = buildCanonicalName(s, 'ALL_BANNERS', masterOverrides) + '.zip';
+
+  var masterBlob = await master.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+  var url = URL.createObjectURL(masterBlob);
+  var a   = document.createElement('a');
+  a.href     = url;
+  a.download = masterName;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  btn.textContent = '⬇ Download All (.zip)';
+  btn.disabled = false;
+  log('  ⬇ ' + masterName + ' (' + formatSize(masterBlob.size) + ')', 'ok');
+});
+
+// ── Naming convention — date init + live preview ──────────────────────────────
+(function() {
+  // Auto-fill today's date in YYYYMMDD format
+  var d = new Date();
+  var mm = d.getMonth() + 1;
+  var dd = d.getDate();
+  document.getElementById('nc-date').value =
+    d.getFullYear() +
+    (mm < 10 ? '0' : '') + mm +
+    (dd < 10 ? '0' : '') + dd;
+
+  function updatePreview() {
+    var brand    = document.getElementById('nc-brand').value    || 'BA';
+    var year     = document.getElementById('nc-year').value     || 'YYYY';
+    var vertical = document.getElementById('nc-vertical').value || 'V';
+    var campaign = document.getElementById('nc-campaign').value || '—';
+    var funnel   = document.getElementById('nc-funnel').value   || 'XX';
+    var copy     = document.getElementById('nc-copy').value     || '—';
+    var date     = document.getElementById('nc-date').value     || 'YYYYMMDD';
+    document.getElementById('nc-preview').textContent =
+      [brand, year, vertical, campaign, funnel, copy, 'DISPLAY', 'DYN', date, '{size}'].join('_') + '.zip';
+  }
+
+  var watchIds = ['nc-year', 'nc-vertical', 'nc-campaign', 'nc-funnel', 'nc-copy', 'nc-date'];
+  watchIds.forEach(function(id) {
+    var el = document.getElementById(id);
+    el.addEventListener('input',  updatePreview);
+    el.addEventListener('change', updatePreview);
+  });
+
+  updatePreview();
+})();
+
+window.addEventListener('load', function() { setTimeout(scan, 300); });
+</script>
+</body>
+</html>
